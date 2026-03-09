@@ -911,7 +911,7 @@ tbody tr:last-child { border-bottom: none; }
         </div>
       </div>
       <div class="card" style="margin-bottom:18px">
-        <div class="form-row">
+        <div class="form-row" style="margin-bottom:14px">
           <div class="form-group">
             <label>Kelas</label>
             <select id="qaClass" onchange="loadQuickClass()">
@@ -919,14 +919,33 @@ tbody tr:last-child { border-bottom: none; }
             </select>
           </div>
           <div class="form-group">
-            <label>Tajuk / Standard</label>
-            <select id="qaTopicSelect" style="display:none" onchange="refreshStudentTPBadges()"><option value="">-- Pilih Tajuk DSKP --</option></select>
-            <input type="text" id="qaTopicText" placeholder="Tajuk pentaksiran...">
-          </div>
-          <div class="form-group">
             <label>Tarikh</label>
             <input type="date" id="qaDate">
           </div>
+        </div>
+        <!-- Tab Tajuk / S.Kandungan -->
+        <!-- Tab Tajuk / S.Kandungan -->
+        <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px">
+          <button id="qaTabTajuk" onclick="switchQATab('tajuk')" style="padding:8px 18px;border:none;background:none;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid #1e40af;color:#1e40af;margin-bottom:-2px">📌 Tajuk</button>
+          <button id="qaTabSP" onclick="switchQATab('sp')" style="padding:8px 18px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px">📋 Standard Kandungan</button>
+        </div>
+        <!-- Panel Tajuk -->
+        <div id="qaPanelTajuk">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Tajuk Pentaksiran</label>
+            <input type="text" id="qaTopicText" placeholder="Contoh: Jirim, Nombor Bulat...">
+          </div>
+        </div>
+        <!-- Panel Standard Kandungan -->
+        <div id="qaPanelSP" style="display:none">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Standard Kandungan</label>
+            <input type="text" id="qaSPCombined" placeholder="cth: 1.1 Haiwan — Pemakanan dan Pembiakan..." oninput="refreshStudentTPBadges()">
+          </div>
+        </div>
+        <!-- Nota DSKP -->
+        <div id="qaDSKPNote" style="display:none;margin-top:10px;padding:10px 14px;background:#eff6ff;border-radius:8px;font-size:12px;color:#1e40af">
+          📚 DSKP akan dimuatkan selepas bahan diterima.
         </div>
       </div>
       <div class="card">
@@ -1059,27 +1078,28 @@ tbody tr:last-child { border-bottom: none; }
       <button class="modal-close" onclick="closeModal('addClassModal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:14px">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tahun</label>
+          <select id="newClassYear" onchange="updateClassNames()">
+            <option value="">-- Pilih Tahun --</option>
+            <option value="Tahun 2">Tahun 2</option>
+            <option value="Tahun 3">Tahun 3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Subjek</label>
+          <select id="newClassSubject" onchange="updateClassNames()">
+            <option value="">-- Pilih Subjek --</option>
+            <option value="Sains">SAINS</option>
+            <option value="Matematik">MATEMATIK</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:4px">
         <label>Nama Kelas</label>
         <select id="newClassName">
-          <option value="">-- Pilih Kelas --</option>
-          <option>3 BIJAK</option>
-          <option>3 CEMERLANG</option>
-          <option>3 DEDIKASI</option>
-          <option>3 EFEKTIF</option>
-          <option>3 GIGIH</option>
-          <option>3 HARMONI</option>
-          <option>3 INTELEK</option>
-          <option>2 FOKUS</option>
-          <option>2 EFEKTIF</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Subjek</label>
-        <select id="newClassSubject">
-          <option value="">-- Pilih Subjek --</option>
-          <option>MATEMATIK</option>
-          <option>SAINS</option>
+          <option value="">-- Pilih Tahun & Subjek dahulu --</option>
         </select>
       </div>
     </div>
@@ -1314,42 +1334,13 @@ const TP_DESC = [
 // ─── DSKP TOPICS ─────────────────────────────────────
 const DSKP_TOPICS = {
   'Matematik': {
-    'Tahun 1': [
-      'Nombor Bulat hingga 100','Tambah dalam Lingkungan 100','Tolak dalam Lingkungan 100',
-      'Darab 2, 3, 4, 5','Bahagi 2, 3, 4, 5','Pecahan Mudah','Wang',
-      'Masa','Panjang','Timbangan','Isipadu Cecair','Bentuk 2D','Bentuk 3D'
-    ],
-    'Tahun 2': [
-      'Nombor Bulat hingga 1 000','Tambah dalam Lingkungan 1 000','Tolak dalam Lingkungan 1 000',
-      'Darab 6, 7, 8, 9','Bahagi 6, 7, 8, 9','Pecahan','Wang',
-      'Masa dan Waktu','Panjang','Timbangan','Isipadu Cecair','Bentuk 2D','Bentuk 3D','Data'
-    ],
     'Tahun 3': [
       'Nombor Bulat hingga 10 000','Tambah','Tolak','Darab','Bahagi',
       'Pecahan','Perpuluhan','Wang','Masa dan Waktu',
       'Panjang','Timbangan','Isipadu Cecair','Perimeter','Bentuk 2D','Bentuk 3D','Data dan Statistik'
     ],
-    'Tahun 4': [
-      'Nombor Bulat hingga 100 000','Pecahan','Perpuluhan','Peratus','Wang',
-      'Masa dan Waktu','Panjang','Timbangan','Isipadu Cecair',
-      'Perimeter dan Luas','Bentuk 2D','Bentuk 3D','Data dan Statistik'
-    ],
-    'Tahun 5': [
-      'Nombor Bulat hingga 1 000 000','Perpuluhan','Pecahan','Peratus','Wang',
-      'Masa dan Waktu','Panjang','Timbangan','Isipadu Cecair',
-      'Perimeter dan Luas','Isipadu Bentuk 3D','Purata','Data dan Statistik','Kebarangkalian'
-    ],
-    'Tahun 6': [
-      'Nombor Bulat','Pecahan','Perpuluhan','Peratus','Nisbah','Kadar Nisbah','Wang',
-      'Masa dan Waktu','Panjang','Timbangan','Isipadu Cecair',
-      'Perimeter, Luas dan Isipadu','Purata, Data dan Statistik','Kebarangkalian','Algebra'
-    ],
   },
   'Sains': {
-    'Tahun 1': [
-      'Deria dan Fungsinya','Haiwan — Ciri-ciri Haiwan','Tumbuhan — Ciri-ciri Tumbuhan',
-      'Bahan di Sekeliling Kita','Sumber Cahaya','Sumber Bunyi','Bumi — Siang dan Malam'
-    ],
     'Tahun 2': [
       'Haiwan — Kitar Hidup','Tumbuhan — Tumbesaran dan Keperluan',
       'Jirim — Sifat Bahan','Daya — Tolak dan Tarik','Tenaga — Sumber Haba','Bumi — Cuaca','Ekosistem'
@@ -1359,26 +1350,8 @@ const DSKP_TOPICS = {
       'Jirim — Keadaan Bahan','Daya dan Gerakan','Tenaga — Cahaya','Tenaga — Bunyi',
       'Magnet','Bumi — Sumber Alam'
     ],
-    'Tahun 4': [
-      'Sel — Unit Kehidupan','Haiwan — Adaptasi','Tumbuhan — Adaptasi',
-      'Jirim — Perubahan Fizikal dan Kimia','Haba dan Perubahan Suhu',
-      'Elektrik — Litar Mudah','Bumi — Tanah','Ekosistem — Keseimbangan Alam'
-    ],
-    'Tahun 5': [
-      'Nutrisi — Makanan Seimbang','Penyakit dan Pencegahan',
-      'Tumbuhan — Pembiakan','Jirim — Asid dan Alkali',
-      'Elektrik — Konduktor dan Penebat','Tenaga — Tenaga Boleh Baharu',
-      'Bumi — Sistem Suria','Alam Semesta'
-    ],
-    'Tahun 6': [
-      'Manusia — Sistem Tubuh Badan','Pembiakan Manusia',
-      'Jirim — Campuran dan Larutan','Daya — Tekanan',
-      'Tenaga — Pemuliharaan Tenaga','Bumi — Pencemaran Alam',
-      'Alam Sekitar — Pembangunan Lestari','Teknologi dan Sains'
-    ],
   }
 };
-
 function getTopicsForClass(cls) {
   if (!cls) return null;
   const subjectTopics = DSKP_TOPICS[cls.subject];
@@ -1413,8 +1386,7 @@ function seedData() {
   DB.classes = [
     { id:'c1', name:'3 Bestari', year:'Tahun 3', subject:'Matematik', color:'c0', students:0 },
     { id:'c2', name:'3 Amanah', year:'Tahun 3', subject:'Sains', color:'c1', students:0 },
-    { id:'c3', name:'4 Cemerlang', year:'Tahun 4', subject:'Bahasa Malaysia', color:'c2', students:0 },
-    { id:'c4', name:'5 Wawasan', year:'Tahun 5', subject:'Matematik', color:'c3', students:0 },
+    { id:'c3', name:'2 Bijak', year:'Tahun 2', subject:'Sains', color:'c2', students:0 },
   ];
 
   const names = [
@@ -1717,22 +1689,44 @@ function renderClasses() {
   }).join('');
 }
 
+function updateClassNames() {
+  var year = document.getElementById('newClassYear').value;
+  var subj = document.getElementById('newClassSubject').value;
+  var sel  = document.getElementById('newClassName');
+  sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+  if (!year || !subj) { sel.innerHTML = '<option value="">-- Pilih Tahun & Subjek dahulu --</option>'; return; }
+
+  // Kelas Tahun 2
+  var names2 = ['2 BIJAK','2 CEMERLANG','2 DEDIKASI','2 EFEKTIF','2 FOKUS','2 GIGIH','2 HARMONI','2 INTELEK'];
+  // Kelas Tahun 3
+  var names3 = ['3 BIJAK','3 CEMERLANG','3 DEDIKASI','3 EFEKTIF','3 GIGIH','3 HARMONI','3 INTELEK'];
+  var list = year === 'Tahun 2' ? names2 : names3;
+
+  list.forEach(function(n) {
+    var opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+}
+
 function addClass() {
-  const name = document.getElementById('newClassName').value.trim();
+  const name    = document.getElementById('newClassName').value.trim();
   const subject = document.getElementById('newClassSubject').value.trim();
-  if (!name||!subject) { showToast('Sila isi nama kelas dan subjek','error'); return; }
+  const year    = document.getElementById('newClassYear').value.trim();
+  if (!name||!subject||!year) { showToast('Sila isi tahun, subjek dan nama kelas','error'); return; }
   const colors = ['c0','c1','c2','c3'];
   DB.classes.push({
-    id:'c'+Date.now(), name, year:'', subject,
+    id:'c'+Date.now(), name, year, subject,
     color: colors[DB.classes.length%4], students:0
   });
   closeModal('addClassModal');
-  document.getElementById('newClassName').value='';
-  document.getElementById('newClassSubject').value='';
+  document.getElementById('newClassName').innerHTML = '<option value="">-- Pilih Tahun & Subjek dahulu --</option>';
+  document.getElementById('newClassSubject').value = '';
+  document.getElementById('newClassYear').value = '';
   populateClassSelects(); updateActiveClassDropdown();
   renderClasses();
   saveDB();
-  showToast(`Kelas "${name}" berjaya ditambah`,'success');
+  showToast(`Kelas "${name}" (${year} ${subject}) berjaya ditambah`,'success');
   logActivity(`Kelas <strong>${name}</strong> baru ditambah`,'#1a56db');
 }
 
@@ -2227,24 +2221,13 @@ function initQuickAssess() {
 
 function loadQuickClass() {
   const cid = document.getElementById('qaClass').value;
-  const cls = DB.classes.find(c=>c.id===cid);
-  const topics = getTopicsForClass(cls);
-  const sel = document.getElementById('qaTopicSelect');
-  const txt = document.getElementById('qaTopicText');
 
-  // Toggle select vs text input based on subject
-  if (topics) {
-    sel.style.display = '';
-    txt.style.display = 'none';
-    sel.innerHTML = '<option value="">-- Pilih Tajuk DSKP --</option>' +
-      topics.map(t=>`<option value="${t}">${t}</option>`).join('');
-  } else {
-    sel.style.display = 'none';
-    txt.style.display = '';
-    txt.value = '';
-  }
+  // Reset tab ke Tajuk bila tukar kelas
+  switchQATab('tajuk');
+  document.getElementById('qaTopicText').value = '';
+  document.getElementById('qaSPCombined').value = '';
 
-  // Reset TP selections only
+  // Reset TP selections
   Object.keys(quickTPSelections).forEach(k=>delete quickTPSelections[k]);
 
   const studs = DB.students.filter(s=>s.classId===cid);
@@ -2277,10 +2260,51 @@ function refreshStudentTPBadges() {
   renderQuickStudentRows(studs, topic);
 }
 
+var _qaActiveTab = 'tajuk';
+
+function switchQATab(tab) {
+  _qaActiveTab = tab;
+  // Update tab styles
+  var btnTajuk = document.getElementById('qaTabTajuk');
+  var btnSP    = document.getElementById('qaTabSP');
+  var panelTajuk = document.getElementById('qaPanelTajuk');
+  var panelSP    = document.getElementById('qaPanelSP');
+  if (tab === 'tajuk') {
+    btnTajuk.style.borderBottomColor = '#1e40af';
+    btnTajuk.style.color = '#1e40af';
+    btnTajuk.style.fontWeight = '700';
+    btnSP.style.borderBottomColor = 'transparent';
+    btnSP.style.color = 'var(--text-muted)';
+    btnSP.style.fontWeight = '600';
+    panelTajuk.style.display = '';
+    panelSP.style.display = 'none';
+  } else {
+    btnSP.style.borderBottomColor = '#1e40af';
+    btnSP.style.color = '#1e40af';
+    btnSP.style.fontWeight = '700';
+    btnTajuk.style.borderBottomColor = 'transparent';
+    btnTajuk.style.color = 'var(--text-muted)';
+    btnTajuk.style.fontWeight = '600';
+    panelTajuk.style.display = 'none';
+    panelSP.style.display = '';
+  }
+  refreshStudentTPBadges();
+}
+
+function buildSPValue() {
+  // S. Kandungan kini satu field — fungsi ini dikekalkan sebagai stub
+  refreshStudentTPBadges();
+}
+
 function getSelectedTopic() {
-  const sel = document.getElementById('qaTopicSelect');
-  const txt = document.getElementById('qaTopicText');
-  return sel && sel.style.display !== 'none' ? sel.value : (txt ? txt.value : '');
+  if (_qaActiveTab === 'sp') {
+    return (document.getElementById('qaSPCombined').value || '').trim();
+  }
+  // Tab Tajuk — check dropdown or text input
+  var sel = document.getElementById('qaTopicSelect');
+  var txt = document.getElementById('qaTopicText');
+  if (sel && sel.style.display !== 'none') return sel.value || '';
+  return txt ? (txt.value || '').trim() : '';
 }
 
 function renderQuickStudentRows(studs, currentTopic) {
@@ -3071,12 +3095,12 @@ function autoSync() {
 
 // Hantar sebagai form POST — cara paling reliable untuk GAS
 function gasForm(payload) {
-  var formData = new FormData();
-  formData.append('payload', JSON.stringify(payload));
+  var body = 'payload=' + encodeURIComponent(JSON.stringify(payload));
   fetch(GAS_URL, {
     method: 'POST',
     mode: 'no-cors',
-    body: formData
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body
   }).catch(function(e) { console.warn('GAS error:', e); });
 }
 
