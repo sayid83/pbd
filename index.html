@@ -1470,9 +1470,8 @@ function seedData() {
   saveDB();
 }
 
-function saveDB() {
-  try { localStorage.setItem('pbdDB', JSON.stringify(DB)); } catch(e){}
-}
+// saveDB defined in GAS section above
+
 
 
 function loadDB() {
@@ -3011,6 +3010,82 @@ function saveProfile() {
   document.getElementById('dashDate').textContent = formatDate(new Date()) + ' — ' + (school || DB.teacher.school);
   closeModal('profileModal');
   showToast('Profil berjaya dikemaskini!', 'success');
+}
+
+// ─── GOOGLE SHEETS SYNC ──────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxb7QZawzsbgtHKIChYhKP80Kv_Hcixa0KwCFxVCmu_B4DSS4M-oz9-6Gnyr44-Mq2l/exec';
+
+let _syncTimer = null;
+
+function saveDB() {
+  try { localStorage.setItem('pbdDB', JSON.stringify(DB)); } catch(e){}
+  autoSync();
+}
+
+function autoSync() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(function() {
+    const students = DB.students.map(s => {
+      const cls = DB.classes.find(c => c.id === s.classId);
+      return Object.assign({}, s, { className: cls ? cls.name : '' });
+    });
+    const records = DB.records.map(r => {
+      const stu = DB.students.find(s => s.id === r.studentId);
+      const cls = DB.classes.find(c => c.id === r.classId);
+      return Object.assign({}, r, { studentName: stu ? stu.name : '', className: cls ? cls.name : '' });
+    });
+
+    // Hantar kelas dulu
+    gasForm({ action: 'sync_kelas', classes: DB.classes });
+
+    // Hantar murid dalam batch 10
+    var BATCH = 10;
+    for (var i = 0; i < students.length; i += BATCH) {
+      (function(batch) {
+        setTimeout(function() {
+          gasForm({ action: 'sync_murid', students: batch });
+        }, 1000 + (i / BATCH) * 800);
+      })(students.slice(i, i + BATCH));
+    }
+
+    // Hantar rekod dalam batch 10
+    for (var j = 0; j < records.length; j += BATCH) {
+      (function(batch) {
+        setTimeout(function() {
+          gasForm({ action: 'sync_rekod', records: batch });
+        }, 2000 + (j / BATCH) * 800);
+      })(records.slice(j, j + BATCH));
+    }
+
+    showSyncBadge('☁️ Syncing...');
+    setTimeout(function() { showSyncBadge('☁️ Synced'); }, 3000);
+  }, 2000);
+}
+
+// Hantar sebagai form POST — cara paling reliable untuk GAS
+function gasForm(payload) {
+  var formData = new FormData();
+  formData.append('payload', JSON.stringify(payload));
+  fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).catch(function(e) { console.warn('GAS error:', e); });
+}
+
+function showSyncBadge(msg) {
+  var badge = document.getElementById('syncBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'syncBadge';
+    badge.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1e40af;color:#fff;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;transition:opacity .5s;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+    document.body.appendChild(badge);
+  }
+  badge.style.opacity = '1';
+  badge.textContent = msg;
+  if (msg.includes('Synced')) {
+    setTimeout(function() { badge.style.opacity = '0'; }, 3000);
+  }
 }
 
 // ─── LOGIN ────────────────────────────────────────────
