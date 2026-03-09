@@ -701,7 +701,6 @@ tbody tr:last-child { border-bottom: none; }
           <div class="t-name" id="teacherName">Cikgu Sayid</div>
           <div class="t-role" id="teacherSchool">Guru Kelas / Subjek</div>
         </div>
-        <button class="logout-btn" onclick="syncToGSheets('backup')" title="Backup ke Google Sheets" style="font-size:14px;">☁️</button>
         <button class="logout-btn" onclick="resetAppData()" title="Reset Data" style="font-size:14px;">🔄</button>
         <button class="logout-btn" onclick="doLogout()" title="Log Keluar">⏻</button>
       </div>
@@ -1473,90 +1472,9 @@ function seedData() {
 
 function saveDB() {
   try { localStorage.setItem('pbdDB', JSON.stringify(DB)); } catch(e){}
-  autoSync();
 }
 
-// ── AUTO SYNC ke Google Sheets (senyap, background) ──
-let _syncTimer = null;
-function autoSync() {
-  clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(function() {
-    const url = getGasUrl();
-    if (!url) return;
 
-    const students = DB.students.map(s => {
-      const cls = DB.classes.find(c => c.id === s.classId);
-      return Object.assign({}, s, { className: cls ? cls.name : '' });
-    });
-    const records = DB.records.map(r => {
-      const stu = DB.students.find(s => s.id === r.studentId);
-      const cls = DB.classes.find(c => c.id === r.classId);
-      return Object.assign({}, r, { studentName: stu ? stu.name : '', className: cls ? cls.name : '' });
-    });
-
-    // Hantar dalam batch — kelas dulu, lepas tu murid (10 setiap batch), lepas tu rekod
-    var batches = [];
-
-    // Batch 1: kelas sahaja
-    batches.push({ action: 'sync_kelas', teacher: DB.teacher.name, classes: DB.classes });
-
-    // Batch murid — 15 setiap batch
-    var BATCH = 15;
-    for (var i = 0; i < students.length; i += BATCH) {
-      batches.push({ action: 'sync_murid', students: students.slice(i, i + BATCH) });
-    }
-
-    // Batch rekod — 10 setiap batch
-    for (var j = 0; j < records.length; j += BATCH) {
-      batches.push({ action: 'sync_rekod', records: records.slice(j, j + BATCH) });
-    }
-
-    // Hantar satu per satu dengan jeda
-    var idx = 0;
-    function sendNext() {
-      if (idx >= batches.length) {
-        showSyncBadge('☁️ Synced (' + students.length + ' murid)');
-        return;
-      }
-      gasPost(url, batches[idx], function(ok) {
-        idx++;
-        setTimeout(sendNext, 500);
-      });
-    }
-    sendNext();
-  }, 2000);
-}
-
-// Hantar ke Google Apps Script via Image beacon — bypass CORS, tak perlu response
-function gasPost(url, payload, callback) {
-  try {
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const fullUrl = url + '?payload=' + encoded;
-    const img = new Image();
-    img.onload = function() { if (callback) callback(true); };
-    img.onerror = function() {
-      // onerror pun ok — GAS redirect menyebabkan onerror tapi data tetap masuk
-      if (callback) callback(true);
-    };
-    img.src = fullUrl;
-  } catch(e) {
-    console.error('gasPost error:', e);
-    if (callback) callback(false);
-  }
-}
-
-function showSyncBadge(msg) {
-  let badge = document.getElementById('syncBadge');
-  if (!badge) {
-    badge = document.createElement('div');
-    badge.id = 'syncBadge';
-    badge.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#065f46;color:white;font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;z-index:9000;opacity:0;transition:opacity .3s';
-    document.body.appendChild(badge);
-  }
-  badge.textContent = msg;
-  badge.style.opacity = '1';
-  setTimeout(() => { badge.style.opacity = '0'; }, 3000);
-}
 function loadDB() {
   try {
     const s = localStorage.getItem('pbdDB');
@@ -3128,129 +3046,103 @@ async function doLogin() {
 
 // ─── GOOGLE SHEETS SYNC ───────────────────────────────────────
 
-function saveGasUrl() {
-  const url = document.getElementById('gasUrlInput').value.trim();
-  if (!url || !url.startsWith('https://script.google.com')) {
-    showGasStatus('❌ URL tidak sah. Pastikan URL bermula dengan https://script.google.com', 'error');
-    return;
+// ─── LOGIN ────────────────────────────────────────────
+// Credentials stored as SHA-256 hashes
+const LOGIN_CREDS = {
+  user: 'e3b7ed20cca920a4862e97fde1fdcf49258fc1a9c3b20691648e704ff68bec3e',
+  pass: '18de9efae3ad4dc70c3b7aac4f538ebd5fdfb9fb6b3db8670fbe11d5ff749a12'
+};
+
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  const uHash = await hashStr(u);
+  const pHash = await hashStr(p);
+  if (uHash === LOGIN_CREDS.user && pHash === LOGIN_CREDS.pass) {
+    err.classList.remove('show');
+    document.getElementById('loginScreen').classList.remove('show');
+    try { sessionStorage.setItem('pbd_auth','1'); } catch(e){}
+  } else {
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
   }
-  try { localStorage.setItem('pbd_gas_url', url); } catch(e){}
-  showGasStatus('✅ URL disimpan!', 'success');
 }
 
-function testGasUrl() {
-  const url = getGasUrl();
-  if (!url) { showGasStatus('⚠️ Sila masukkan URL dulu.', 'warning'); return; }
-  showGasStatus('🔌 Menguji sambungan...', 'info');
-  fetch(url)
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) showGasStatus('✅ Sambungan berjaya! Google Script aktif.', 'success');
-      else showGasStatus('⚠️ Script balas tapi ada ralat: ' + d.message, 'warning');
-    })
-    .catch(() => showGasStatus('❌ Gagal sambung. Semak URL dan pastikan deployment betul.', 'error'));
+
+
+// ─── GOOGLE SHEETS SYNC ───────────────────────────────────────
+
+// ─── LOGIN ────────────────────────────────────────────
+// Credentials stored as SHA-256 hashes
+const LOGIN_CREDS = {
+  user: 'e3b7ed20cca920a4862e97fde1fdcf49258fc1a9c3b20691648e704ff68bec3e',
+  pass: '18de9efae3ad4dc70c3b7aac4f538ebd5fdfb9fb6b3db8670fbe11d5ff749a12'
+};
+
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function getGasUrl() {
-  return 'https://script.google.com/macros/s/AKfycbyz8hgP4r52-WvulDkCJ6fdJkqarqfFFVvPlBHbmzij8rZtAFbaoVIAtFxKKMg4PQ-EbQ/exec';
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  const uHash = await hashStr(u);
+  const pHash = await hashStr(p);
+  if (uHash === LOGIN_CREDS.user && pHash === LOGIN_CREDS.pass) {
+    err.classList.remove('show');
+    document.getElementById('loginScreen').classList.remove('show');
+    try { sessionStorage.setItem('pbd_auth','1'); } catch(e){}
+  } else {
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
 }
 
-function syncToGSheets(action) {
-  const url = getGasUrl();
-  if (!url) { showSyncStatus('⚠️ Sila masukkan URL Google Script dulu.', 'warning'); return; }
 
-  showSyncStatus('⏳ Menghantar data...', 'info');
 
-  // Enrich students with class name
-  const students = DB.students.map(s => {
-    const cls = DB.classes.find(c => c.id === s.classId);
-    return { ...s, className: cls ? cls.name : '' };
-  });
+// ─── GOOGLE SHEETS SYNC ───────────────────────────────────────
 
-  // Enrich records with names
-  const records = DB.records.map(r => {
-    const stu = DB.students.find(s => s.id === r.studentId);
-    const cls = DB.classes.find(c => c.id === r.classId);
-    return { ...r, studentName: stu ? stu.name : '', className: cls ? cls.name : '' };
-  });
+// ─── LOGIN ────────────────────────────────────────────
+// Credentials stored as SHA-256 hashes
+const LOGIN_CREDS = {
+  user: 'e3b7ed20cca920a4862e97fde1fdcf49258fc1a9c3b20691648e704ff68bec3e',
+  pass: '18de9efae3ad4dc70c3b7aac4f538ebd5fdfb9fb6b3db8670fbe11d5ff749a12'
+};
 
-  const payload = {
-    action,
-    teacher: DB.teacher.name,
-    classes: DB.classes,
-    students,
-    records
-  };
-
-  showSyncStatus('⏳ Menghantar data...', 'info');
-  gasPost(url, payload, function(ok) {
-    if (ok) showSyncStatus('✅ Berjaya dihantar! (' + students.length + ' murid, ' + records.length + ' rekod)\nSemak Google Sheets dalam beberapa saat.', 'success');
-    else showSyncStatus('❌ Gagal hantar. Semak URL Google Script.', 'error');
-  });
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function syncLaporanToGSheets() {
-  const url = getGasUrl();
-  if (!url) { showSyncStatus('⚠️ Sila masukkan URL Google Script dulu.', 'warning'); return; }
-
-  const filterCid = document.getElementById('reportClassSelect')?.value || '';
-  const klasList = filterCid ? DB.classes.filter(c => c.id === filterCid) : DB.classes;
-
-  const rows = [];
-  klasList.forEach(c => {
-    const studs = DB.students.filter(s => s.classId === c.id);
-    const recs  = DB.records.filter(r => r.classId === c.id);
-    const avg   = recs.length ? (recs.reduce((s,r)=>s+r.tp,0)/recs.length).toFixed(2) : 0;
-    studs.forEach(s => {
-      const r    = recs.filter(rec => rec.studentId === s.id);
-      const last = r.length ? r[r.length-1] : null;
-      rows.push([
-        c.name, s.name, s.gender,
-        last ? 'TP' + last.tp : 'Belum dinilai',
-        last ? (last.tp >= 4 ? 'Memuaskan' : 'Perlu Bimbingan') : '—',
-        avg,
-        formatDate(new Date())
-      ]);
-    });
-  });
-
-  showSyncStatus('⏳ Menghantar laporan...', 'info');
-  gasPost(url, { action: 'laporan', laporan: rows, className: klasList.map(c=>c.name).join(', ') }, function(ok) {
-    if (ok) showSyncStatus('✅ Laporan dihantar! (' + rows.length + ' baris)', 'success');
-    else showSyncStatus('❌ Gagal hantar laporan.', 'error');
-  });
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  const uHash = await hashStr(u);
+  const pHash = await hashStr(p);
+  if (uHash === LOGIN_CREDS.user && pHash === LOGIN_CREDS.pass) {
+    err.classList.remove('show');
+    document.getElementById('loginScreen').classList.remove('show');
+    try { sessionStorage.setItem('pbd_auth','1'); } catch(e){}
+  } else {
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
 }
 
-function showGasStatus(msg, type) {
-  const el = document.getElementById('gasStatus');
-  if (!el) return;
-  const colors = { success:'#d1fae5', error:'#fee2e2', warning:'#fef3c7', info:'#dbeafe' };
-  const text   = { success:'#065f46', error:'#991b1b', warning:'#92400e', info:'#1e40af' };
-  el.style.display = 'block';
-  el.style.background = colors[type] || colors.info;
-  el.style.color = text[type] || text.info;
-  el.style.padding = '10px 14px';
-  el.style.borderRadius = '8px';
-  el.style.fontWeight = '600';
-  el.textContent = msg;
-}
 
-function showSyncStatus(msg, type) {
-  const el = document.getElementById('syncStatus');
-  if (!el) return;
-  const colors = { success:'#d1fae5', error:'#fee2e2', warning:'#fef3c7', info:'#dbeafe' };
-  const text   = { success:'#065f46', error:'#991b1b', warning:'#92400e', info:'#1e40af' };
-  el.style.display = 'block';
-  el.style.background = colors[type] || colors.info;
-  el.style.color = text[type] || text.info;
-  el.style.padding = '10px 14px';
-  el.style.borderRadius = '8px';
-  el.style.fontWeight = '600';
-  el.textContent = msg;
-}
 
-// Load saved GAS URL on page show
-const _origShowPage = showPage;
 </script>
 </body>
 </html>
