@@ -3038,30 +3038,34 @@ function autoSync() {
       return Object.assign({}, r, { studentName: stu ? stu.name : '', className: cls ? cls.name : '' });
     });
 
-    // Hantar kelas dulu
-    gasForm({ action: 'sync_kelas', classes: DB.classes });
+    // Bina senarai semua batch secara berturutan
+    var queue = [];
+    queue.push({ action: 'sync_kelas', classes: DB.classes });
 
-    // Hantar murid dalam batch 10
-    var BATCH = 10;
+    var BATCH = 15;
     for (var i = 0; i < students.length; i += BATCH) {
-      (function(batch) {
-        setTimeout(function() {
-          gasForm({ action: 'sync_murid', students: batch });
-        }, 1000 + (i / BATCH) * 800);
-      })(students.slice(i, i + BATCH));
+      queue.push({ action: 'sync_murid', students: students.slice(i, i + BATCH) });
     }
-
-    // Hantar rekod dalam batch 10
     for (var j = 0; j < records.length; j += BATCH) {
-      (function(batch) {
-        setTimeout(function() {
-          gasForm({ action: 'sync_rekod', records: batch });
-        }, 2000 + (j / BATCH) * 800);
-      })(records.slice(j, j + BATCH));
+      queue.push({ action: 'sync_rekod', records: records.slice(j, j + BATCH) });
     }
 
-    showSyncBadge('☁️ Syncing...');
-    setTimeout(function() { showSyncBadge('☁️ Synced'); }, 3000);
+    // Hantar satu per satu — tunggu 1.2s sebelum hantar batch seterusnya
+    var idx = 0;
+    showSyncBadge('☁️ Syncing... (0/' + queue.length + ')');
+
+    function sendNext() {
+      if (idx >= queue.length) {
+        showSyncBadge('☁️ Synced (' + students.length + ' murid)');
+        return;
+      }
+      gasForm(queue[idx]);
+      idx++;
+      showSyncBadge('☁️ Syncing... (' + idx + '/' + queue.length + ')');
+      setTimeout(sendNext, 1200);
+    }
+    sendNext();
+
   }, 2000);
 }
 
