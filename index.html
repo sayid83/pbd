@@ -3044,40 +3044,6 @@ async function doLogin() {
 
 
 
-// ─── GOOGLE SHEETS SYNC ───────────────────────────────────────
-
-// ─── LOGIN ────────────────────────────────────────────
-// Credentials stored as SHA-256 hashes
-const LOGIN_CREDS = {
-  user: 'e3b7ed20cca920a4862e97fde1fdcf49258fc1a9c3b20691648e704ff68bec3e',
-  pass: '18de9efae3ad4dc70c3b7aac4f538ebd5fdfb9fb6b3db8670fbe11d5ff749a12'
-};
-
-async function hashStr(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-async function doLogin() {
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginError');
-  const uHash = await hashStr(u);
-  const pHash = await hashStr(p);
-  if (uHash === LOGIN_CREDS.user && pHash === LOGIN_CREDS.pass) {
-    err.classList.remove('show');
-    document.getElementById('loginScreen').classList.remove('show');
-    try { sessionStorage.setItem('pbd_auth','1'); } catch(e){}
-  } else {
-    err.classList.add('show');
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginPass').focus();
-  }
-}
-
-
-
-// ─── GOOGLE SHEETS SYNC ───────────────────────────────────────
 
 // ─── LOGIN ────────────────────────────────────────────
 // Credentials stored as SHA-256 hashes
