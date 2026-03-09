@@ -1483,6 +1483,7 @@ function autoSync() {
   _syncTimer = setTimeout(function() {
     const url = getGasUrl();
     if (!url) return;
+
     const students = DB.students.map(s => {
       const cls = DB.classes.find(c => c.id === s.classId);
       return Object.assign({}, s, { className: cls ? cls.name : '' });
@@ -1492,16 +1493,37 @@ function autoSync() {
       const cls = DB.classes.find(c => c.id === r.classId);
       return Object.assign({}, r, { studentName: stu ? stu.name : '', className: cls ? cls.name : '' });
     });
-    const payload = {
-      action: 'sync_all',
-      teacher: DB.teacher.name,
-      classes: DB.classes,
-      students: students,
-      records: records
-    };
-    gasPost(url, payload, function(ok) {
-      if (ok) showSyncBadge('☁️ Synced');
-    });
+
+    // Hantar dalam batch — kelas dulu, lepas tu murid (10 setiap batch), lepas tu rekod
+    var batches = [];
+
+    // Batch 1: kelas sahaja
+    batches.push({ action: 'sync_kelas', teacher: DB.teacher.name, classes: DB.classes });
+
+    // Batch murid — 15 setiap batch
+    var BATCH = 15;
+    for (var i = 0; i < students.length; i += BATCH) {
+      batches.push({ action: 'sync_murid', students: students.slice(i, i + BATCH) });
+    }
+
+    // Batch rekod — 10 setiap batch
+    for (var j = 0; j < records.length; j += BATCH) {
+      batches.push({ action: 'sync_rekod', records: records.slice(j, j + BATCH) });
+    }
+
+    // Hantar satu per satu dengan jeda
+    var idx = 0;
+    function sendNext() {
+      if (idx >= batches.length) {
+        showSyncBadge('☁️ Synced (' + students.length + ' murid)');
+        return;
+      }
+      gasPost(url, batches[idx], function(ok) {
+        idx++;
+        setTimeout(sendNext, 500);
+      });
+    }
+    sendNext();
   }, 2000);
 }
 
