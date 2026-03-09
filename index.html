@@ -1505,33 +1505,37 @@ function autoSync() {
   }, 2000);
 }
 
-// Hantar ke Google Apps Script via GET + URL params
+// Hantar ke Google Apps Script via JSONP — bypass CORS sepenuhnya
 function gasPost(url, payload, callback) {
   try {
+    const cbName = 'gasCallback_' + Date.now();
     const encoded = encodeURIComponent(JSON.stringify(payload));
-    const fullUrl = url + '?payload=' + encoded;
-    
-    // Cuba dengan cors dulu (dapat response), fallback no-cors
-    fetch(fullUrl, { method: 'GET' })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      console.log('GAS response:', d);
-      showSyncBadge(d.success ? '☁️ Synced' : '⚠️ ' + d.message);
-      if (callback) callback(d.success);
-    })
-    .catch(function() {
-      // CORS block — cuba no-cors (tak dapat response tapi data masuk)
-      fetch(fullUrl, { method: 'GET', mode: 'no-cors' })
-      .then(function() {
-        console.log('GAS: sent no-cors');
-        if (callback) callback(true);
-      })
-      .catch(function(err) {
-        console.error('GAS failed:', err);
-        showSyncBadge('❌ Sync gagal');
+    const fullUrl = url + '?payload=' + encoded + '&callback=' + cbName;
+
+    window[cbName] = function(data) {
+      try { delete window[cbName]; } catch(e) {}
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+      console.log('GAS response:', data);
+      if (callback) callback(data && data.success);
+    };
+
+    const script = document.createElement('script');
+    script.src = fullUrl;
+    script.onerror = function() {
+      try { delete window[cbName]; } catch(e) {}
+      console.warn('GAS JSONP error');
+      if (callback) callback(false);
+    };
+
+    setTimeout(function() {
+      if (window[cbName]) {
+        try { delete window[cbName]; } catch(e) {}
+        try { if (script.parentNode) script.parentNode.removeChild(script); } catch(e) {}
         if (callback) callback(false);
-      });
-    });
+      }
+    }, 10000);
+
+    document.head.appendChild(script);
   } catch(e) {
     console.error('gasPost error:', e);
     if (callback) callback(false);
