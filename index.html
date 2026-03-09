@@ -1186,6 +1186,7 @@ tbody tr:last-child { border-bottom: none; }
     <div class="modal-body" id="studentProfileContent"></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('studentProfileModal')">Tutup</button>
+      <button class="btn btn-danger" onclick="confirmDeleteOneStudent()">🗑️ Padam Murid Ini</button>
       <button class="btn btn-primary" onclick="assessFromProfile()">✏️ Nilai Murid</button>
     </div>
   </div>
@@ -3087,6 +3088,20 @@ function showSyncBadge(msg) {
   badge.textContent = msg;
   if (msg.includes('Synced')) {
     setTimeout(function() { badge.style.opacity = '0'; }, 3000);
+  }
+}
+
+// ─── DELETE STUDENTS ──────────────────────────────────
+function confirmDeleteOneStudent() {
+  var stu = DB.students.find(function(s){ return s.id === currentStudentProfile; });
+  if (!stu) return;
+  if (confirm('Padam murid ' + stu.name + ' dan semua rekod PBD beliau? Tindakan ini tidak boleh dibatalkan!')) {
+    DB.students = DB.students.filter(function(s){ return s.id !== currentStudentProfile; });
+    DB.records  = DB.records.filter(function(r){ return r.studentId !== currentStudentProfile; });
+    saveDB();
+    closeModal('studentProfileModal');
+    renderStudents();
+    showToast(stu.name + ' telah dipadam.', 'success');
   }
 }
 
