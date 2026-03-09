@@ -1527,37 +1527,18 @@ function autoSync() {
   }, 2000);
 }
 
-// Hantar ke Google Apps Script via JSONP — bypass CORS sepenuhnya
+// Hantar ke Google Apps Script via Image beacon — bypass CORS, tak perlu response
 function gasPost(url, payload, callback) {
   try {
-    const cbName = 'gasCallback_' + Date.now();
     const encoded = encodeURIComponent(JSON.stringify(payload));
-    const fullUrl = url + '?payload=' + encoded + '&callback=' + cbName;
-
-    window[cbName] = function(data) {
-      try { delete window[cbName]; } catch(e) {}
-      if (script && script.parentNode) script.parentNode.removeChild(script);
-      console.log('GAS response:', data);
-      if (callback) callback(data && data.success);
+    const fullUrl = url + '?payload=' + encoded;
+    const img = new Image();
+    img.onload = function() { if (callback) callback(true); };
+    img.onerror = function() {
+      // onerror pun ok — GAS redirect menyebabkan onerror tapi data tetap masuk
+      if (callback) callback(true);
     };
-
-    const script = document.createElement('script');
-    script.src = fullUrl;
-    script.onerror = function() {
-      try { delete window[cbName]; } catch(e) {}
-      console.warn('GAS JSONP error');
-      if (callback) callback(false);
-    };
-
-    setTimeout(function() {
-      if (window[cbName]) {
-        try { delete window[cbName]; } catch(e) {}
-        try { if (script.parentNode) script.parentNode.removeChild(script); } catch(e) {}
-        if (callback) callback(false);
-      }
-    }, 10000);
-
-    document.head.appendChild(script);
+    img.src = fullUrl;
   } catch(e) {
     console.error('gasPost error:', e);
     if (callback) callback(false);
