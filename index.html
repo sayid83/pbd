@@ -794,6 +794,8 @@ tbody tr:last-child { border-bottom: none; }
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" onclick="importCSV()">📥 Import CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteStudents('kelas')">🗑️ Padam Ikut Kelas</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteStudents('semua')">🗑️ Padam Semua Murid</button>
             <button class="btn btn-primary btn-sm" onclick="showModal('addStudentModal')">➕ Tambah Murid</button>
           </div>
         </div>
@@ -3088,6 +3090,57 @@ function showSyncBadge(msg) {
   }
 }
 
+// ─── DELETE STUDENTS ──────────────────────────────────
+var _deleteMode = '';
+
+function confirmDeleteStudents(mode) {
+  _deleteMode = mode;
+  var title = document.getElementById('deleteStudentsTitle');
+  var msg = document.getElementById('deleteStudentsMsg');
+  var wrap = document.getElementById('deleteClassSelectWrap');
+  var sel = document.getElementById('deleteClassSelect');
+
+  if (mode === 'semua') {
+    title.textContent = '🗑️ Padam Semua Murid';
+    msg.textContent = 'Anda akan memadam SEMUA murid (' + DB.students.length + ' orang) dan semua rekod PBD mereka.';
+    wrap.style.display = 'none';
+  } else {
+    title.textContent = '🗑️ Padam Murid Ikut Kelas';
+    msg.textContent = 'Pilih kelas yang ingin dipadam semua muridnya beserta rekod PBD.';
+    wrap.style.display = 'block';
+    // Populate class dropdown
+    sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+    DB.classes.forEach(function(c) {
+      var count = DB.students.filter(function(s){ return s.classId === c.id; }).length;
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name + ' (' + count + ' murid)';
+      sel.appendChild(opt);
+    });
+  }
+  showModal('deleteStudentsModal');
+}
+
+function executeDeleteStudents() {
+  if (_deleteMode === 'semua') {
+    DB.students = [];
+    DB.records = [];
+    showToast('Semua murid dan rekod telah dipadam.', 'success');
+  } else {
+    var cid = document.getElementById('deleteClassSelect').value;
+    if (!cid) { showToast('Sila pilih kelas dahulu.', 'error'); return; }
+    var cls = DB.classes.find(function(c){ return c.id === cid; });
+    var before = DB.students.length;
+    DB.students = DB.students.filter(function(s){ return s.classId !== cid; });
+    DB.records = DB.records.filter(function(r){ return r.classId !== cid; });
+    var deleted = before - DB.students.length;
+    showToast((cls ? cls.name : 'Kelas') + ': ' + deleted + ' murid dipadam.', 'success');
+  }
+  saveDB();
+  closeModal('deleteStudentsModal');
+  renderStudents();
+}
+
 // ─── LOGIN ────────────────────────────────────────────
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
@@ -3105,5 +3158,31 @@ function doLogin() {
 }
 
 </script>
+
+<!-- ═══ DELETE STUDENTS MODAL ═══ -->
+<div id="deleteStudentsModal" class="modal-overlay" onclick="if(event.target===this)closeModal('deleteStudentsModal')">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <h3 id="deleteStudentsTitle">🗑️ Padam Murid</h3>
+      <button class="modal-close" onclick="closeModal('deleteStudentsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="deleteStudentsMsg" style="margin-bottom:16px;color:#64748b"></p>
+      <div id="deleteClassSelectWrap" style="display:none;margin-bottom:16px">
+        <label style="font-weight:600;display:block;margin-bottom:6px">Pilih Kelas:</label>
+        <select id="deleteClassSelect" class="filter-select" style="width:100%">
+          <option value="">-- Pilih Kelas --</option>
+        </select>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;margin-bottom:16px">
+        <p style="color:#991b1b;font-weight:600;margin:0">⚠️ Amaran: Tindakan ini tidak boleh dibatalkan!</p>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal('deleteStudentsModal')">Batal</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDeleteStudents()">🗑️ Padam</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
