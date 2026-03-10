@@ -920,32 +920,42 @@ tbody tr:last-child { border-bottom: none; }
           </div>
           <div class="form-group">
             <label>Tarikh</label>
-            <input type="date" id="qaDate">
+            <input type="text" id="qaDate" placeholder="dd/mm/yyyy" maxlength="10"
+              oninput="formatQADate(this)"
+              style="letter-spacing:1px">
           </div>
         </div>
-        <!-- Tab Tajuk / S.Kandungan -->
-        <!-- Tab Tajuk / S.Kandungan -->
+        <!-- 2 Tab: Tajuk / S.Kandungan -->
         <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px">
           <button id="qaTabTajuk" onclick="switchQATab('tajuk')" style="padding:8px 18px;border:none;background:none;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid #1e40af;color:#1e40af;margin-bottom:-2px">📌 Tajuk</button>
-          <button id="qaTabSP" onclick="switchQATab('sp')" style="padding:8px 18px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px">📋 Standard Kandungan</button>
+          <button id="qaTabSK" onclick="switchQATab('sk')" style="padding:8px 18px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px">📋 S. Kandungan</button>
         </div>
         <!-- Panel Tajuk -->
         <div id="qaPanelTajuk">
           <div class="form-group" style="margin-bottom:0">
             <label>Tajuk Pentaksiran</label>
+            <select id="qaTopicSelect" style="display:none" onchange="onTajukDropdownChange()">
+              <option value="">-- Pilih Tajuk --</option>
+            </select>
             <input type="text" id="qaTopicText" placeholder="Contoh: Jirim, Nombor Bulat...">
           </div>
         </div>
-        <!-- Panel Standard Kandungan -->
-        <div id="qaPanelSP" style="display:none">
-          <div class="form-group" style="margin-bottom:0">
-            <label>Standard Kandungan</label>
-            <input type="text" id="qaSPCombined" placeholder="cth: 1.1 Haiwan — Pemakanan dan Pembiakan..." oninput="refreshStudentTPBadges()">
+        <!-- Panel S. Kandungan (SK + SP dalam satu panel) -->
+        <div id="qaPanelSK" style="display:none">
+          <div class="form-group" style="margin-bottom:10px">
+            <label>Standard Kandungan (SK)</label>
+            <select id="qaSKSelect" style="display:none" onchange="onSKDropdownChange()">
+              <option value="">-- Pilih Standard Kandungan --</option>
+            </select>
+            <input type="text" id="qaSKText" placeholder="cth: 2.1 Organ Pernafasan..." oninput="refreshStudentTPBadges()">
           </div>
-        </div>
-        <!-- Nota DSKP -->
-        <div id="qaDSKPNote" style="display:none;margin-top:10px;padding:10px 14px;background:#eff6ff;border-radius:8px;font-size:12px;color:#1e40af">
-          📚 DSKP akan dimuatkan selepas bahan diterima.
+          <div class="form-group" style="margin-bottom:0">
+            <label>Standard Pembelajaran (SP)</label>
+            <!-- Checkbox list (Sains Tahun 3) -->
+            <div id="qaSPCheckboxWrap" style="display:none;border:1px solid var(--border);border-radius:8px;padding:10px 12px;max-height:180px;overflow-y:auto;background:var(--bg)"></div>
+            <!-- Free text (lain-lain) -->
+            <input type="text" id="qaSPCombined" placeholder="cth: 2.1.1 Standard Pembelajaran..." oninput="refreshStudentTPBadges()">
+          </div>
         </div>
       </div>
       <div class="card">
@@ -1332,25 +1342,177 @@ const TP_DESC = [
 ];
 
 // ─── DSKP TOPICS ─────────────────────────────────────
-const DSKP_TOPICS = {
-  'Matematik': {
-    'Tahun 3': [
-      'Nombor Bulat hingga 10 000','Tambah','Tolak','Darab','Bahagi',
-      'Pecahan','Perpuluhan','Wang','Masa dan Waktu',
-      'Panjang','Timbangan','Isipadu Cecair','Perimeter','Bentuk 2D','Bentuk 3D','Data dan Statistik'
-    ],
-  },
+// Format: { subjek: { tahun: [ { tajuk, sk: ['sk1','sk2',...] } ] } }
+const DSKP_FULL = {
   'Sains': {
-    'Tahun 2': [
-      'Haiwan — Kitar Hidup','Tumbuhan — Tumbesaran dan Keperluan',
-      'Jirim — Sifat Bahan','Daya — Tolak dan Tarik','Tenaga — Sumber Haba','Bumi — Cuaca','Ekosistem'
-    ],
     'Tahun 3': [
-      'Haiwan — Pemakanan dan Pembiakan','Tumbuhan — Bahagian dan Fungsi',
-      'Jirim — Keadaan Bahan','Daya dan Gerakan','Tenaga — Cahaya','Tenaga — Bunyi',
-      'Magnet','Bumi — Sumber Alam'
+      { tajuk: '1. Kemahiran Saintifik', sk: [
+        { kod: '1.1 Kemahiran Proses Sains', sp: [
+          '1.1.1 Memerhati',
+          '1.1.2 Mengelas',
+          '1.1.3 Mengukur dan menggunakan nombor',
+          '1.1.4 Membuat inferens',
+          '1.1.5 Meramal',
+          '1.1.6 Berkomunikasi'
+        ]},
+        { kod: '1.2 Kemahiran Manipulatif', sp: [
+          '1.2.1 Menggunakan dan mengendalikan peralatan dan bahan sains dengan betul.',
+          '1.2.2 Mengendalikan spesimen dengan betul dan cermat.',
+          '1.2.3 Melakar spesimen, peralatan dan bahan sains dengan betul.',
+          '1.2.4 Membersihkan peralatan sains dengan cara yang betul.',
+          '1.2.5 Menyimpan peralatan dan bahan sains dengan betul dan selamat.'
+        ]}
+      ]},
+      { tajuk: '2. Peraturan Bilik Sains', sk: [
+        { kod: '2.1 Peraturan Bilik Sains', sp: [
+          '2.1.1 Mematuhi peraturan bilik sains.'
+        ]}
+      ]},
+      { tajuk: '3. Manusia', sk: [
+        { kod: '3.1 Gigi', sp: [
+          '3.1.1 Memerihalkan jenis gigi dan fungsinya.',
+          '3.1.2 Melabelkan struktur gigi.',
+          '3.1.3 Membanding dan membezakan set gigi susu dan set gigi kekal.',
+          '3.1.4 Menghubung kait penjagaan kesihatan gigi dengan struktur gigi.',
+          '3.1.5 Menjelaskan pemerhatian tentang gigi melalui lakaran, TMK, penulisan atau lisan.'
+        ]},
+        { kod: '3.2 Kelas Makanan', sp: [
+          '3.2.1 Memberi contoh makanan bagi setiap kelas makanan (Implied).',
+          '3.2.2 Mengitlak kepentingan makanan (Implied).',
+          '3.2.3 Menjelas dengan contoh makanan seimbang berdasarkan piramid makanan.',
+          '3.2.4 Menaakul kesan pengambilan makanan yang tidak seimbang.',
+          '3.2.5 Menjelaskan pemerhatian tentang kelas makanan menerusi lakaran, TMK, penulisan atau lisan.'
+        ]},
+        { kod: '3.3 Pencernaan', sp: [
+          '3.3.1 Memerihalkan proses pencernaan.',
+          '3.3.2 Membuat urutan aliran makanan semasa pencernaan.',
+          '3.3.3 Merumus tentang makanan tercerna yang tidak diperlukan oleh badan.',
+          '3.3.4 Menjelaskan pemerhatian tentang pencernaan menerusi lakaran, TMK, penulisan atau lisan.'
+        ]}
+      ]},
+      { tajuk: '4. Haiwan', sk: [
+        { kod: '4.1 Tabiat Pemakanan', sp: [
+          '4.1.1 Mengelas haiwan mengikut tabiat pemakanan.',
+          '4.1.2 Menjelaskan dengan contoh tabiat pemakanan haiwan herbivor, karnivor dan omnivor.',
+          '4.1.3 Membuat inferens tentang kumpulan haiwan berdasarkan tabiat pemakanan.',
+          '4.1.4 Membanding dan membezakan kegigian haiwan herbivor, karnivor, dan omnivor.',
+          '4.1.5 Menjelaskan pemerhatian tentang tabiat pemakanan haiwan.'
+        ]}
+      ]},
+      { tajuk: '5. Tumbuhan', sk: [
+        { kod: '5.1 Pembiakan Tumbuhan', sp: [
+          '5.1.1 Memberi contoh tumbuhan bagi setiap cara pembiakan.',
+          '5.1.2 Menaakul kepentingan pembiakan tumbuhan kepada hidupan.',
+          '5.1.3 Mengitlak satu tumbuhan boleh membiak melalui pelbagai cara dengan menjalankan projek.',
+          '5.1.4 Menjelaskan pemerhatian tentang pembiakan tumbuhan melalui lakaran, TMK, penulisan atau lisan.'
+        ]}
+      ]},
+      { tajuk: '6. Pengukuran', sk: [
+        { kod: '6.1 Pengukuran Luas dan Isi Padu', sp: [
+          '6.1.1 Menyatakan unit yang digunakan untuk mengukur luas dan isi padu.',
+          '6.1.2 Mengukur luas permukaan sekata menggunakan petak berukuran 1cm x 1cm.',
+          '6.1.3 Menyelesaikan masalah untuk menganggar luas permukaan yang tidak sekata.',
+          '6.1.4 Mengukur isi padu kotak lohong dengan kubus 1cm x 1cm x 1cm.',
+          '6.1.5 Mengukur isi padu cecair menggunakan alat dan teknik yang betul.',
+          '6.1.6 Menyelesaikan masalah menentukan isi padu pepejal tidak sekata (kaedah sesaran air).',
+          '6.1.7 Menjelaskan pemerhatian secara kreatif.'
+        ]}
+      ]},
+      { tajuk: '7. Ketumpatan', sk: [
+        { kod: '7.1 Objek/Bahan Timbul atau Tenggelam', sp: [
+          '7.1.1 Membuat inferens tentang objek/bahan timbul dan tenggelam.',
+          '7.1.2 Menghubung kait objek timbul/tenggelam dengan ketumpatan.',
+          '7.1.3 Menyelesaikan masalah bagi mengenal pasti kaedah menjadikan air lebih tumpat.',
+          '7.1.4 Menjelaskan pemerhatian tentang ketumpatan secara kreatif.'
+        ]}
+      ]},
+      { tajuk: '8. Asid dan Alkali', sk: [
+        { kod: '8.1 Asid dan Alkali', sp: [
+          '8.1.1 Menguji bahan yang berasid, beralkali dan neutral (kertas litmus).',
+          '8.1.2 Mengitlak bahan berasid, beralkali dan neutral dari aspek rasa dan sentuhan.',
+          '8.1.3 Meneroka bahan lain yang boleh menguji bahan berasid, beralkali dan neutral.',
+          '8.1.4 Menjelaskan pemerhatian tentang asid dan alkali secara kreatif.'
+        ]}
+      ]},
+      { tajuk: '9. Sistem Suria', sk: [
+        { kod: '9.1 Sistem Suria', sp: [
+          '9.1.1 Menyenaraikan ahli dalam Sistem Suria.',
+          '9.1.2 Mengitlak suhu planet berdasarkan urutan.',
+          '9.1.3 Memerihalkan planet beredar mengelilingi Matahari mengikut orbit.',
+          '9.1.4 Menghubung kait kedudukan planet dari Matahari dengan masa edaran.',
+          '9.1.5 Menjelaskan pemerhatian tentang sistem suria secara kreatif.'
+        ]}
+      ]},
+      { tajuk: '10. Takal', sk: [
+        { kod: '10.1 Takal', sp: [
+          '10.1.1 Menyatakan maksud dan kegunaan takal.',
+          '10.1.2 Memerihalkan cara takal tetap berfungsi.',
+          '10.1.3 Memberi contoh aplikasi takal dalam kehidupan.',
+          '10.1.4 Mereka cipta model takal yang berfungsi.',
+          '10.1.5 Menjelaskan pemerhatian tentang takal secara kreatif.'
+        ]}
+      ]}
     ],
+    'Tahun 2': [
+      { tajuk: '1. Kemahiran Saintifik', sk: [
+        { kod: '1.1 Kemahiran Proses Sains', sp: [
+          '1.1.1 Memerhati',
+          '1.1.2 Mengelas',
+          '1.1.3 Mengukur dan menggunakan nombor',
+          '1.1.4 Berkomunikasi'
+        ]},
+        { kod: '1.2 Kemahiran Manipulatif', sp: [
+          '1.2.1 Menggunakan dan mengendalikan peralatan dan bahan sains dengan betul.',
+          '1.2.2 Mengendalikan spesimen dengan betul dan cermat.',
+          '1.2.3 Melakar spesimen, peralatan dan bahan sains dengan betul.',
+          '1.2.4 Membersihkan peralatan sains.',
+          '1.2.5 Menyimpan peralatan dan bahan sains.'
+        ]}
+      ]},
+      { tajuk: '2. Peraturan Bilik Sains', sk: [
+        { kod: '2.1 Peraturan Bilik Sains', sp: [
+          '2.1.1 Mematuhi peraturan bilik sains'
+        ]}
+      ]},
+      { tajuk: '3. Manusia', sk: [
+        { kod: '3.1 Pembiakan dan Tumbesaran Manusia', sp: [
+          '3.1.1 Menyatakan cara manusia membiak.',
+          '3.1.2 Memerihalkan perubahan diri sejak lahir (saiz, tinggi, berat).',
+          '3.1.3 Mengitlak tumbesaran berbeza antara individu.',
+          '3.1.4 Memerihalkan pewarisan ciri daripada ibu bapa/keturunan.',
+          '3.1.5 Menjelaskan pemerhatian melalui lakaran/TMK.'
+        ]}
+      ]},
+      { tajuk: '4. Haiwan', sk: [
+        { kod: '4.1 Pembiakan dan Tumbesaran Haiwan', sp: [
+          '4.1.1 Menyatakan cara haiwan membiak (bertelur/beranak).',
+          '4.1.2 Mengelaskan haiwan berdasarkan cara pembiakan.',
+          '4.1.3 Menjelaskan haiwan bertelur banyak/sedikit, beranak banyak/sedikit.',
+          '4.1.4 Merekod kitar hidup haiwan.',
+          '4.1.5 Menjelaskan anak haiwan menyerupai/tidak menyerupai induk.'
+        ]}
+      ]},
+      { tajuk: '5. Tumbuhan', sk: [
+        { kod: '5.1 Tumbesaran Tumbuhan', sp: [
+          '5.1.1 Menyatakan kepentingan tumbuhan.',
+          '5.1.2 Menyatakan keperluan asas biji benih bercambah (air, udara, suhu).',
+          '5.1.3 Merekod tumbesaran tumbuhan.',
+          '5.1.4 Menyusun urutan tumbesaran.',
+          '5.1.5 Membuat kesimpulan keperluan asas tumbesaran.'
+        ]}
+      ]}
+    ]
+  },
+  'Matematik': {
+    'Tahun 3': [],
+    'Tahun 2': []
   }
+};
+
+// Legacy flat list (used by old code paths)
+const DSKP_TOPICS = {
+  'Matematik': { 'Tahun 3': [], 'Tahun 2': [] },
+  'Sains':     { 'Tahun 3': [], 'Tahun 2': [] }
 };
 function getTopicsForClass(cls) {
   if (!cls) return null;
@@ -1532,7 +1694,8 @@ function closeSidebar() {
 function initApp() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('assDate').value = today;
-  document.getElementById('qaDate').value = today;
+  const todayParts = today.split('-');
+  document.getElementById('qaDate').value = todayParts[2]+'/'+todayParts[1]+'/'+todayParts[0];
   document.getElementById('qrDate').value = today;
   populateClassSelects();
   updateActiveClassDropdown();
@@ -2221,14 +2384,54 @@ function initQuickAssess() {
 
 function loadQuickClass() {
   const cid = document.getElementById('qaClass').value;
+  const cls = DB.classes.find(c=>c.id===cid);
 
   // Reset tab ke Tajuk bila tukar kelas
   switchQATab('tajuk');
-  document.getElementById('qaTopicText').value = '';
-  document.getElementById('qaSPCombined').value = '';
-
-  // Reset TP selections
   Object.keys(quickTPSelections).forEach(k=>delete quickTPSelections[k]);
+
+  const tajukDrop = document.getElementById('qaTopicSelect');
+  const tajukText = document.getElementById('qaTopicText');
+  const skDrop    = document.getElementById('qaSKSelect');
+  const skText    = document.getElementById('qaSKText');
+  const spDrop    = document.getElementById('qaSPSelect');
+  const spText    = document.getElementById('qaSPCombined');
+
+  // Semak sama ada kelas ini ada DSKP_FULL
+  const dskpData = (cls && DSKP_FULL[cls.subject] && DSKP_FULL[cls.subject][cls.year])
+    ? DSKP_FULL[cls.subject][cls.year] : null;
+
+  if (dskpData) {
+    // Tajuk: dropdown
+    tajukDrop.innerHTML = '<option value="">-- Pilih Tajuk --</option>' +
+      dskpData.map(function(t){ return '<option value="'+t.tajuk+'">'+t.tajuk+'</option>'; }).join('');
+    tajukDrop.value = '';
+    tajukDrop.style.display = '';
+    tajukText.style.display = 'none';
+    tajukText.value = '';
+    // SK: dropdown (kosong dulu)
+    skDrop.innerHTML = '<option value="">-- Pilih Tajuk dahulu --</option>';
+    skDrop.value = '';
+    skDrop.style.display = '';
+    skText.style.display = 'none';
+    skText.value = '';
+    // SP: checkbox wrap (kosong dulu, keluar selepas SK dipilih)
+    var spWrap = document.getElementById('qaSPCheckboxWrap');
+    spWrap.innerHTML = '';
+    spWrap.dataset.value = '';
+    spWrap.style.display = '';
+    spText.style.display = 'none';
+    spText.value = '';
+  } else {
+    // Tajuk, SK & SP: text input biasa
+    tajukDrop.style.display = 'none'; tajukDrop.value = '';
+    tajukText.style.display = ''; tajukText.value = '';
+    skDrop.style.display = 'none';
+    skText.style.display = ''; skText.value = '';
+    var spWrap2 = document.getElementById('qaSPCheckboxWrap');
+    if (spWrap2) { spWrap2.style.display = 'none'; spWrap2.innerHTML = ''; spWrap2.dataset.value = ''; }
+    spText.style.display = ''; spText.value = '';
+  }
 
   const studs = DB.students.filter(s=>s.classId===cid);
   const container = document.getElementById('quickAssessStudents');
@@ -2237,6 +2440,74 @@ function loadQuickClass() {
     return;
   }
   renderQuickStudentRows(studs, getSelectedTopic());
+}
+
+// Bila tajuk dropdown berubah — isi SK dropdown
+function onTajukDropdownChange() {
+  const cid   = document.getElementById('qaClass').value;
+  const cls   = DB.classes.find(c=>c.id===cid);
+  const tajuk = document.getElementById('qaTopicSelect').value;
+  const skDrop = document.getElementById('qaSKSelect');
+  const spDrop = document.getElementById('qaSPSelect');
+  if (cls && tajuk && DSKP_FULL[cls.subject] && DSKP_FULL[cls.subject][cls.year]) {
+    const entry = DSKP_FULL[cls.subject][cls.year].find(function(t){ return t.tajuk === tajuk; });
+    if (entry) {
+      skDrop.innerHTML = '<option value="">-- Pilih Standard Kandungan --</option>' +
+        entry.sk.map(function(s){ return '<option value="'+s.kod+'">'+s.kod+'</option>'; }).join('');
+      skDrop.value = '';
+    }
+  }
+  // Reset SP checkbox wrap when tajuk changes
+  var spWrap = document.getElementById('qaSPCheckboxWrap');
+  if (spWrap) { spWrap.innerHTML = ''; spWrap.dataset.value = ''; }
+  refreshStudentTPBadges();
+}
+
+// Bila SK dropdown berubah — render SP sebagai checkbox
+function onSKDropdownChange() {
+  const cid    = document.getElementById('qaClass').value;
+  const cls    = DB.classes.find(c=>c.id===cid);
+  const tajuk  = document.getElementById('qaTopicSelect').value;
+  const skVal  = document.getElementById('qaSKSelect').value;
+  const wrap   = document.getElementById('qaSPCheckboxWrap');
+  wrap.innerHTML = '';
+  if (cls && tajuk && skVal && DSKP_FULL[cls.subject] && DSKP_FULL[cls.subject][cls.year]) {
+    const tajukEntry = DSKP_FULL[cls.subject][cls.year].find(function(t){ return t.tajuk === tajuk; });
+    if (tajukEntry) {
+      const skEntry = tajukEntry.sk.find(function(s){ return s.kod === skVal; });
+      if (skEntry && skEntry.sp.length) {
+        skEntry.sp.forEach(function(sp, i) {
+          var id = 'qaSPcb_' + i;
+          var div = document.createElement('div');
+          div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);';
+          if (i === skEntry.sp.length - 1) div.style.borderBottom = 'none';
+          div.innerHTML = '<input type="checkbox" id="'+id+'" value="'+sp+'" onchange="onSPCheckboxChange()" style="margin-top:3px;flex-shrink:0;accent-color:#1e40af;width:15px;height:15px">'
+            + '<label for="'+id+'" style="font-size:13px;cursor:pointer;line-height:1.4">'+sp+'</label>';
+          wrap.appendChild(div);
+        });
+      }
+    }
+  }
+  refreshStudentTPBadges();
+}
+
+// Bila checkbox SP berubah — update hidden value
+function onSPCheckboxChange() {
+  var checked = [];
+  document.querySelectorAll('#qaSPCheckboxWrap input[type=checkbox]:checked').forEach(function(cb){
+    checked.push(cb.value);
+  });
+  // Store combined value untuk getSelectedTopic
+  document.getElementById('qaSPCheckboxWrap').dataset.value = checked.join(' | ');
+  refreshStudentTPBadges();
+}
+
+// Get selected SP values (multi)
+function getSelectedSPValues() {
+  var wrap = document.getElementById('qaSPCheckboxWrap');
+  if (!wrap || wrap.style.display === 'none') return [];
+  var val = wrap.dataset.value || '';
+  return val ? val.split(' | ') : [];
 }
 
 function resetTPOnly() {
@@ -2264,30 +2535,25 @@ var _qaActiveTab = 'tajuk';
 
 function switchQATab(tab) {
   _qaActiveTab = tab;
-  // Update tab styles
-  var btnTajuk = document.getElementById('qaTabTajuk');
-  var btnSP    = document.getElementById('qaTabSP');
-  var panelTajuk = document.getElementById('qaPanelTajuk');
-  var panelSP    = document.getElementById('qaPanelSP');
-  if (tab === 'tajuk') {
-    btnTajuk.style.borderBottomColor = '#1e40af';
-    btnTajuk.style.color = '#1e40af';
-    btnTajuk.style.fontWeight = '700';
-    btnSP.style.borderBottomColor = 'transparent';
-    btnSP.style.color = 'var(--text-muted)';
-    btnSP.style.fontWeight = '600';
-    panelTajuk.style.display = '';
-    panelSP.style.display = 'none';
-  } else {
-    btnSP.style.borderBottomColor = '#1e40af';
-    btnSP.style.color = '#1e40af';
-    btnSP.style.fontWeight = '700';
-    btnTajuk.style.borderBottomColor = 'transparent';
-    btnTajuk.style.color = 'var(--text-muted)';
-    btnTajuk.style.fontWeight = '600';
-    panelTajuk.style.display = 'none';
-    panelSP.style.display = '';
-  }
+  var tabs = ['tajuk','sk'];
+  var btnIds   = { tajuk:'qaTabTajuk', sk:'qaTabSK' };
+  var panelIds = { tajuk:'qaPanelTajuk', sk:'qaPanelSK' };
+  tabs.forEach(function(t) {
+    var btn   = document.getElementById(btnIds[t]);
+    var panel = document.getElementById(panelIds[t]);
+    if (!btn || !panel) return;
+    if (t === tab) {
+      btn.style.borderBottomColor = '#1e40af';
+      btn.style.color = '#1e40af';
+      btn.style.fontWeight = '700';
+      panel.style.display = '';
+    } else {
+      btn.style.borderBottomColor = 'transparent';
+      btn.style.color = 'var(--text-muted)';
+      btn.style.fontWeight = '600';
+      panel.style.display = 'none';
+    }
+  });
   refreshStudentTPBadges();
 }
 
@@ -2296,14 +2562,37 @@ function buildSPValue() {
   refreshStudentTPBadges();
 }
 
+// Auto-format tarikh input sebagai dd/mm/yyyy
+function formatQADate(el) {
+  var v = el.value.replace(/[^0-9]/g, '').substring(0, 8);
+  var out = '';
+  if (v.length > 4) out = v.substring(0,2)+'/'+v.substring(2,4)+'/'+v.substring(4);
+  else if (v.length > 2) out = v.substring(0,2)+'/'+v.substring(2);
+  else out = v;
+  el.value = out;
+}
+
 function getSelectedTopic() {
-  if (_qaActiveTab === 'sp') {
-    return (document.getElementById('qaSPCombined').value || '').trim();
+  if (_qaActiveTab === 'sk') {
+    // Tab S. Kandungan — utamakan SP checkbox kalau ada pilihan
+    var wrap = document.getElementById('qaSPCheckboxWrap');
+    if (wrap && wrap.style.display !== 'none') {
+      var spVal = wrap.dataset.value || '';
+      if (spVal) return spVal;
+    }
+    // SP text input
+    var spText = document.getElementById('qaSPCombined');
+    if (spText && spText.style.display !== 'none' && spText.value.trim())
+      return spText.value.trim();
+    // Fallback ke SK
+    var skDrop = document.getElementById('qaSKSelect');
+    if (skDrop && skDrop.style.display !== 'none') return skDrop.value || '';
+    return (document.getElementById('qaSKText').value || '').trim();
   }
-  // Tab Tajuk — check dropdown or text input
-  var sel = document.getElementById('qaTopicSelect');
+  // Tab Tajuk
+  var tajukDrop = document.getElementById('qaTopicSelect');
+  if (tajukDrop && tajukDrop.style.display !== 'none') return tajukDrop.value || '';
   var txt = document.getElementById('qaTopicText');
-  if (sel && sel.style.display !== 'none') return sel.value || '';
   return txt ? (txt.value || '').trim() : '';
 }
 
@@ -2359,14 +2648,37 @@ function setQuickTP(sid, tp, btn) {
 
 function saveQuickAssess() {
   const cid = document.getElementById('qaClass').value;
-  const topic = getSelectedTopic().trim();
-  const date = document.getElementById('qaDate').value;
-  if (!cid||!topic) { showToast('Sila pilih kelas dan tajuk','error'); return; }
+  const qaDateRaw = document.getElementById('qaDate').value.trim();
+  // Convert dd/mm/yyyy → yyyy-mm-dd for storage
+  const dateParts = qaDateRaw.split('/');
+  const date = (dateParts.length === 3)
+    ? dateParts[2]+'-'+dateParts[1]+'-'+dateParts[0]
+    : qaDateRaw;
+  if (!cid) { showToast('Sila pilih kelas','error'); return; }
+
+  // Get topic and SK/SP values
+  let topic = '', skVal = '', spVals = [];
+  if (_qaActiveTab === 'sk') {
+    var skDrop = document.getElementById('qaSKSelect');
+    skVal = (skDrop && skDrop.style.display !== 'none') ? skDrop.value : (document.getElementById('qaSKText').value || '').trim();
+    var wrap = document.getElementById('qaSPCheckboxWrap');
+    if (wrap && wrap.style.display !== 'none' && wrap.dataset.value) {
+      spVals = wrap.dataset.value.split(' | ').filter(Boolean);
+    } else {
+      var spTxt = document.getElementById('qaSPCombined').value.trim();
+      if (spTxt) spVals = [spTxt];
+    }
+    topic = spVals.length ? spVals.join(' | ') : skVal;
+  } else {
+    topic = getSelectedTopic().trim();
+  }
+
+  if (!topic) { showToast('Sila pilih tajuk atau standard kandungan','error'); return; }
   const entries = Object.entries(quickTPSelections);
   if (!entries.length) { showToast('Tiada pentaksiran diisi','warning'); return; }
   const cls = DB.classes.find(c=>c.id===cid);
   entries.forEach(([sid,tp])=>{
-    DB.records.push({ id:'r'+Date.now()+sid, classId:cid, studentId:sid, topic, sp:'', activity:'Input Pantas', tp, date, notes:'', subject:cls?.subject||'' });
+    DB.records.push({ id:'r'+Date.now()+sid, classId:cid, studentId:sid, topic, sp: spVals.join(', ') || skVal, activity:'Input Pantas', tp, date, notes:'', subject:cls?.subject||'' });
     const stu=DB.students.find(s=>s.id===sid);
     if(stu) stu.tp[topic]=tp;
   });
