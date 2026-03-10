@@ -1972,6 +1972,75 @@ function closeSidebar() {
 }
 
 // ─── INIT ─────────────────────────────────────────────
+// ── SETUP UI — render awal dari localStorage ─────────────────
+function setupUI() {
+  document.getElementById('teacherName').textContent = DB.teacher.name;
+  const av = document.getElementById('teacherAvatar');
+  if (DB.teacher.photo) {
+    av.innerHTML = '<img src="'+DB.teacher.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  } else {
+    av.textContent = DB.teacher.name[0];
+  }
+  document.getElementById('teacherSchool').textContent = DB.teacher.school || '';
+  document.getElementById('dashTeacherName').textContent = DB.teacher.name;
+  document.getElementById('dashDate').textContent = formatDate(new Date()) + ' — ' + DB.teacher.school;
+  try { if (localStorage.getItem('sidebarHidden')==='1') document.body.classList.add('sidebar-hidden'); } catch(e){}
+  initApp();
+  showPage('dashboard');
+}
+
+// ── PULL DATA DARI GOOGLE SHEETS ─────────────────────────────
+function pullFromSheets() {
+  showSyncBadge('☁️ Memuat data...');
+  fetch(GAS_URL + '?action=pull', { method: 'GET' })
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.success && res.data) {
+        var d = res.data;
+        var hasData = (d.classes && d.classes.length > 0) ||
+                      (d.students && d.students.length > 0) ||
+                      (d.records && d.records.length > 0);
+        if (hasData) {
+          // Ganti data tempatan dengan data dari Sheets
+          if (d.classes  && d.classes.length)  DB.classes  = d.classes;
+          if (d.students && d.students.length) DB.students = d.students;
+          if (d.records  && d.records.length)  DB.records  = d.records;
+          // Kemas kira bilangan murid setiap kelas
+          DB.classes.forEach(function(c) {
+            c.students = DB.students.filter(function(s){ return s.classId === c.id; }).length;
+            if (!c.color) c.color = 'c0';
+          });
+          saveDB();
+          renderAll();
+          showSyncBadge('☁️ Data dikemas kini (' + DB.students.length + ' murid)');
+        } else {
+          showSyncBadge('☁️ Tiada data dalam Sheets');
+        }
+      } else {
+        showSyncBadge('⚠️ Gagal tarik data');
+      }
+    })
+    .catch(function() {
+      showSyncBadge('⚠️ Tiada sambungan');
+    });
+}
+
+function renderAll() {
+  initApp();
+  showPage(currentPage || 'dashboard');
+  document.getElementById('teacherName').textContent = DB.teacher.name;
+  const av = document.getElementById('teacherAvatar');
+  if (av) av.textContent = DB.teacher.name[0];
+  document.getElementById('teacherSchool').textContent = DB.teacher.school || '';
+  document.getElementById('dashTeacherName').textContent = DB.teacher.name;
+  document.getElementById('dashDate').textContent = formatDate(new Date()) + ' — ' + DB.teacher.school;
+  populateClassSelects();
+  updateActiveClassDropdown();
+  renderClasses();
+  renderStudents();
+  renderDashboard();
+}
+
 function initApp() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('assDate').value = today;
@@ -3635,29 +3704,23 @@ function formatDate(d) {
 
 document.addEventListener('DOMContentLoaded',()=>{
   if (!loadDB()) seedData();
-  document.getElementById('teacherName').textContent = DB.teacher.name;
-  const initAv = document.getElementById('teacherAvatar');
-  if (DB.teacher.photo) {
-    initAv.innerHTML = '<img src="'+DB.teacher.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-  } else {
-    initAv.textContent = DB.teacher.name[0];
-  }
-  document.getElementById('teacherSchool').textContent = DB.teacher.school || 'Guru Kelas / Subjek';
-  document.getElementById('dashTeacherName').textContent = DB.teacher.name;
-  document.getElementById('dashDate').textContent = formatDate(new Date()) + ' — ' + DB.teacher.school;
-  try { if (localStorage.getItem('sidebarHidden')==='1') document.body.classList.add('sidebar-hidden'); } catch(e){}
-  initApp();
-  showPage('dashboard');
 
-  // ── LOGIN GATE ──
+  // ── LOGIN GATE (semak dulu sebelum pull) ──
   const loginScreen = document.getElementById('loginScreen');
   try {
     if (sessionStorage.getItem('pbd_auth') === '1') {
       loginScreen.classList.remove('show');
+      // Render dulu dengan localStorage, kemudian pull dari Sheets
+      setupUI();
+      pullFromSheets();
     } else {
       loginScreen.classList.add('show');
+      setupUI();
     }
-  } catch(e) { loginScreen.classList.add('show'); }
+  } catch(e) {
+    loginScreen.classList.add('show');
+    setupUI();
+  }
 
   // Enter key support
   ['loginUser','loginPass'].forEach(id => {
@@ -3874,6 +3937,7 @@ function doLogin() {
     err.classList.remove('show');
     document.getElementById('loginScreen').classList.remove('show');
     try { sessionStorage.setItem('pbd_auth','1'); } catch(e){}
+    pullFromSheets();
   } else {
     err.classList.add('show');
     document.getElementById('loginPass').value = '';
