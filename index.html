@@ -944,9 +944,13 @@ tbody tr:last-child { border-bottom: none; }
         <div id="qaPanelSK" style="display:none">
           <div class="form-group" style="margin-bottom:10px">
             <label>Standard Kandungan (SK)</label>
+            <!-- Dropdown SK (Sains) -->
             <select id="qaSKSelect" style="display:none" onchange="onSKDropdownChange()">
               <option value="">-- Pilih Standard Kandungan --</option>
             </select>
+            <!-- Checkbox SK (Matematik) -->
+            <div id="qaSKCheckboxWrap" style="display:none;border:1px solid var(--border);border-radius:8px;padding:10px 12px;max-height:180px;overflow-y:auto;background:var(--bg)"></div>
+            <!-- Free text (lain-lain) -->
             <input type="text" id="qaSKText" placeholder="cth: 2.1 Organ Pernafasan..." oninput="refreshStudentTPBadges()">
           </div>
           <div class="form-group" style="margin-bottom:0">
@@ -1500,11 +1504,288 @@ const DSKP_FULL = {
           '5.1.4 Menyusun urutan tumbesaran.',
           '5.1.5 Membuat kesimpulan keperluan asas tumbesaran.'
         ]}
+      ]},
+      { tajuk: '6. Terang dan Gelap', sk: [
+        { kod: '6.1 Terang dan Gelap', sp: [
+          '6.1.1 Menyatakan sumber cahaya.',
+          '6.1.2 Membanding beza aktiviti dalam keadaan terang/gelap.',
+          '6.1.3 Menerangkan penghasilan bayang-bayang.',
+          '6.1.4 Membanding kejelasan bayang-bayang (objek berlainan).',
+          '6.1.5 Mencipta permainan bayang-bayang.'
+        ]}
+      ]},
+      { tajuk: '7. Elektrik', sk: [
+        { kod: '7.1 Litar Elektrik (Komponen)', sp: [
+          '7.1.1 Mengenal pasti komponen (sel kering, mentol, suis).',
+          '7.1.2 Menerangkan fungsi komponen.',
+          '7.1.3 Membina litar elektrik lengkap.',
+          '7.1.4 Meramal sebab mentol tidak menyala.'
+        ]},
+        { kod: '7.1 Litar Elektrik (Konduktor/Penebat)', sp: [
+          '7.1.5 Merekod nyalaan mentol dengan objek gantian.',
+          '7.1.6 Mengitlak konduktor dan penebat.'
+        ]}
+      ]},
+      { tajuk: '8. Campuran', sk: [
+        { kod: '8.1 Campuran', sp: [
+          '8.1.1 Memerihalkan kaedah mengasingkan campuran.',
+          '8.1.2 Menaakul cara mengasingkan campuran.',
+          '8.1.3 Mengenal pasti bahan larut/tidak larut air.',
+          '8.1.4 Merumuskan cara melarutkan bahan lebih cepat.'
+        ]}
+      ]},
+      { tajuk: '9. Bumi', sk: [
+        { kod: '9.1 Air', sp: [
+          '9.1.1 Menyenaraikan sumber air semulajadi.',
+          '9.1.2 Menyatakan arah aliran air (tinggi ke rendah).',
+          '9.1.3 Mengitlak aliran air semulajadi.',
+          '9.1.4 Membuat urutan kitar air semulajadi.'
+        ]},
+        { kod: '9.2 Udara', sp: [
+          '9.2.1 Menyatakan udara ada di sekeliling.',
+          '9.2.2 Menyatakan udara terdiri dari gas (oksigen, karbon dioksida).',
+          '9.2.3 Memerihalkan udara bergerak (angin).',
+          '9.2.4 Menjana idea kesan udara bergerak.',
+          '9.2.5 Mencipta model menggunakan udara bergerak.'
+        ]}
+      ]},
+      { tajuk: '10. Teknologi', sk: [
+        { kod: '10.1 Set Binaan', sp: [
+          '10.1.1 Memilih komponen set binaan.',
+          '10.1.2 Membina binaan berpandukan manual.',
+          '10.1.3 Mencipta satu binaan baru.',
+          '10.1.4 Membuka dan menyimpan komponen dengan betul.'
+        ]}
       ]}
     ]
   },
   'Matematik': {
-    'Tahun 3': [],
+    'Tahun 3': [
+      { tajuk: '1. Nombor Bulat hingga 10 000', sk: [
+        { kod: '1.1 Nilai nombor', sp: [
+          '1.1.1 Menamakan nombor hingga 10 000 (baca nombor dalam perkataan, sebut nombor dalam angka, padankan angka dengan perkataan).',
+          '1.1.2 Menentukan nilai nombor hingga 10 000 (tunjuk kuantiti, padan objek–nombor, banding dua nombor, susun menaik/menurun).'
+        ]},
+        { kod: '1.2 Menulis nombor', sp: [
+          '1.2.1 Menulis nombor dalam angka dan perkataan.'
+        ]},
+        { kod: '1.3 Rangkaian nombor', sp: [
+          '1.3.1 Membilang 1–1, 10–10, 100–100, 1000–1000 menaik dan menurun.',
+          '1.3.2 Melengkapkan sebarang rangkaian nombor menaik dan menurun.'
+        ]},
+        { kod: '1.4 Nilai tempat', sp: [
+          '1.4.1 Menyatakan nilai tempat dan nilai digit.',
+          '1.4.2 Mencerakin nombor mengikut nilai tempat dan nilai digit.'
+        ]},
+        { kod: '1.5 Menganggar', sp: [
+          '1.5.1 Memberi anggaran kuantiti munasabah dengan "lebih kurang", "kurang daripada", "lebih daripada".'
+        ]},
+        { kod: '1.6 Membundarkan nombor', sp: [
+          '1.6.1 Membundarkan nombor bulat hingga ribu terdekat.'
+        ]},
+        { kod: '1.7 Pola nombor', sp: [
+          '1.7.1 Mengenal pasti pola siri nombor menaik/menurun (1–1, 10–10, 100–100, 1000–1000).',
+          '1.7.2 Melengkapkan pola nombor menaik/menurun (hingga 6 nombor).'
+        ]},
+        { kod: '1.8 Penyelesaian masalah', sp: [
+          '1.8.1 Menyelesaikan masalah melibatkan nombor bulat hingga 10 000 dalam situasi harian.'
+        ]}
+      ]},
+      { tajuk: '2. Operasi Asas', sk: [
+        { kod: '2.1 Tambah Nombor Hingga 10 000', sp: [
+          '2.1.1 Menambah dua nombor dalam lingkungan 10 000.',
+          '2.1.2 Menambah tiga nombor dalam lingkungan 10 000.',
+          '2.1.3 Menyelesaikan masalah harian melibatkan operasi tambah dalam lingkungan 10 000.'
+        ]},
+        { kod: '2.2 Tolak Nombor Hingga 10 000', sp: [
+          '2.2.1 Menolak dua nombor dalam lingkungan 10 000.',
+          '2.2.2 Menentukan beza antara dua nombor dalam lingkungan 10 000.',
+          '2.2.3 Menyelesaikan masalah harian melibatkan operasi tolak dalam lingkungan 10 000.'
+        ]},
+        { kod: '2.3 Darab Nombor Hingga 10 000', sp: [
+          '2.3.1 Mengingat dan menggunakan fakta asas darab.',
+          '2.3.2 Mendarab nombor dua atau tiga digit dengan nombor satu digit dalam lingkungan 10 000.',
+          '2.3.3 Mendarab nombor dengan 10, 100 dan 1000.',
+          '2.3.4 Menyelesaikan masalah harian melibatkan operasi darab.'
+        ]},
+        { kod: '2.4 Bahagi Nombor Hingga 10 000', sp: [
+          '2.4.1 Membahagi nombor dua atau tiga digit dengan nombor satu digit dalam lingkungan 10 000.',
+          '2.4.2 Membahagi nombor dengan 10, 100 dan 1000.',
+          '2.4.3 Menyelesaikan masalah harian melibatkan operasi bahagi.'
+        ]},
+        { kod: '2.5 Operasi Bergabung dan Penyelesaian Masalah', sp: [
+          '2.5.1 Menulis dan menyelesaikan ayat matematik yang melibatkan gabungan operasi tambah dan tolak dalam lingkungan 10 000.',
+          '2.5.2 Menulis dan menyelesaikan ayat matematik yang melibatkan gabungan operasi darab dengan tambah atau tolak.',
+          '2.5.3 Menyelesaikan masalah harian yang melibatkan operasi bergabung tambah, tolak, darab dan/atau bahagi.'
+        ]}
+      ]},
+      { tajuk: '3. Pecahan, Perpuluhan dan Peratus', sk: [
+        { kod: '3.1 Pecahan', sp: [
+          '3.1.1 Mengenal pasti pecahan wajar sebagai sebahagian daripada satu kumpulan.',
+          '3.1.2 Menyatakan pecahan setara bagi pecahan wajar yang penyebutnya hingga 10.',
+          '3.1.3 Menukar pecahan wajar kepada bentuk termudah, penyebutnya hingga 10.',
+          '3.1.4 Menyatakan pecahan perseratus.',
+          '3.1.5 Menambah dua pecahan wajar melibatkan pelbagai kombinasi penyebut (2, 3, 4, 5, 6, 8, 9, 10) dengan hasil dalam bentuk pecahan wajar.',
+          '3.1.6 Menolak dua pecahan wajar melibatkan pelbagai kombinasi penyebut (2, 3, 4, 5, 6, 8, 9, 10).',
+          '3.1.7 Mengenal pasti pecahan tak wajar dan nombor bercampur melibatkan penyebut hingga 10.'
+        ]},
+        { kod: '3.2 Perpuluhan', sp: [
+          '3.2.1 Menyatakan 0.01 hingga 0.99 dalam angka dan perkataan.',
+          '3.2.2 Mewakilkan perpuluhan dengan petak seratus dan sebaliknya.',
+          '3.2.3 Membanding dua perpuluhan (hingga 2 tempat perpuluhan) berpandukan petak seratus dan garis nombor.',
+          '3.2.4 Menambah dua perpuluhan (hingga 2 tempat, hasil ≤ 0.99).',
+          '3.2.5 Menolak dua perpuluhan (hingga 2 tempat, dalam lingkungan 0.99).'
+        ]},
+        { kod: '3.3 Peratus', sp: [
+          '3.3.1 Menama dan menyebut peratus.',
+          '3.3.2 Mengenal simbol peratus.',
+          '3.3.3 Mewakilkan peratus dalam petak seratus dan sebaliknya.',
+          '3.3.4 Menulis 1% hingga 100%.'
+        ]},
+        { kod: '3.4 Perkaitan Pecahan–Perpuluhan–Peratus', sp: [
+          '3.4.1 Pecahan perseratus ↔ perpuluhan.',
+          '3.4.2 Pecahan perseratus ↔ peratus.',
+          '3.4.3 Peratus ↔ perpuluhan.'
+        ]},
+        { kod: '3.5 Penyelesaian Masalah', sp: [
+          '3.5.1 Mereka cerita berdasarkan ayat matematik pecahan, perpuluhan, peratus.',
+          '3.5.2 Menyelesaikan masalah pecahan, perpuluhan dan peratus.'
+        ]}
+      ]},
+      { tajuk: '4. Wang', sk: [
+        { kod: '4.1 Tambah Wang', sp: [
+          '4.1.1 Ayat matematik tambah: 2 nilai wang, hasil hingga RM10 000.',
+          '4.1.2 Ayat matematik tambah: 3 nilai wang, hasil hingga RM10 000.'
+        ]},
+        { kod: '4.2 Tolak Wang', sp: [
+          '4.2.1 Tolak 2 nilai wang dalam lingkungan RM10 000.',
+          '4.2.2 Tolak 2 nilai wang daripada satu nilai wang (≤ RM10 000).'
+        ]},
+        { kod: '4.3 Operasi Bergabung Tambah dan Tolak Wang', sp: [
+          '4.3.1 Ayat matematik operasi bergabung tambah dan tolak (≤ RM10 000).'
+        ]},
+        { kod: '4.4 Darab Wang', sp: [
+          '4.4.1 Darab nilai wang dengan nombor 1 digit, 10, 100, 1000 (hasil ≤ RM10 000).'
+        ]},
+        { kod: '4.5 Bahagi Wang', sp: [
+          '4.5.1 Bahagi nilai wang (≤ RM10 000) dengan nombor 1 digit, 10, 100, 1000.'
+        ]},
+        { kod: '4.6 Mata Wang Asing', sp: [
+          '4.6.1 Mengenal mata wang negara ASEAN.',
+          '4.6.2 Menyatakan nilai RM1 dengan nilai mata wang semasa negara lain.'
+        ]},
+        { kod: '4.7 Simpanan dan Pelaburan', sp: [
+          '4.7.1 Menjelaskan keperluan dan kehendak sebagai asas simpanan dan perbelanjaan.',
+          '4.7.2 Menjelaskan keperluan menyimpan dan melabur.'
+        ]},
+        { kod: '4.8 Penyelesaian Masalah', sp: [
+          '4.8.1 Mereka cerita berdasarkan ayat matematik operasi asas melibatkan wang.',
+          '4.8.2 Menyelesaikan masalah wang (≤ RM10 000) melibatkan operasi asas dan operasi bergabung tambah dan tolak.'
+        ]}
+      ]},
+      { tajuk: '5. Masa dan Waktu', sk: [
+        { kod: '5.1 Waktu dalam Jam dan Minit', sp: [
+          '5.1.1 Membaca dan mendapat maklumat daripada jadual waktu aktiviti.',
+          '5.1.2 Membaca dan merekod waktu sebelum, semasa dan selepas aktiviti.'
+        ]},
+        { kod: '5.2 Perkaitan dalam Masa', sp: [
+          '5.2.1 Menyatakan perkaitan minggu–hari, tahun–bulan, minit–saat.',
+          '5.2.2 Menukar unit masa (jam–minit, minit–saat).'
+        ]},
+        { kod: '5.3 Kalendar', sp: [
+          '5.3.1 Membaca dan mendapat maklumat daripada kalendar Masihi.'
+        ]},
+        { kod: '5.4 Tambah Masa', sp: [
+          '5.4.1 Tambah hingga tiga nilai masa: jam dengan jam, minit dengan minit, saat dengan saat, jam dan minit, minit dan saat.'
+        ]},
+        { kod: '5.5 Tolak Masa', sp: [
+          '5.5.1 Tolak hingga tiga nilai masa dengan kombinasi yang sama seperti di atas.'
+        ]},
+        { kod: '5.6 Operasi Bergabung Tambah dan Tolak Masa', sp: [
+          '5.6.1 Operasi bergabung tambah dan tolak masa (jam, minit, saat, jam dan minit, minit dan saat).'
+        ]},
+        { kod: '5.7 Darab Masa', sp: [
+          '5.7.1 Darab masa (jam; minit; saat; jam dan minit; minit dan saat) dengan nombor satu digit.'
+        ]},
+        { kod: '5.8 Bahagi Masa', sp: [
+          '5.8.1 Bahagi masa (jam; minit; saat; jam dan minit; minit dan saat) dengan nombor satu digit.'
+        ]},
+        { kod: '5.9 Penyelesaian Masalah', sp: [
+          '5.9.1 Mereka cerita berdasarkan ayat matematik operasi asas melibatkan masa.',
+          '5.9.2 Menyelesaikan masalah berkaitan masa dan waktu dalam situasi harian.'
+        ]}
+      ]},
+      { tajuk: '6. Ukuran dan Sukatan', sk: [
+        { kod: '6.1 Panjang', sp: [
+          '6.1.1 Menukar unit ukuran panjang melibatkan meter dan sentimeter.',
+          '6.1.2 Menyelesaikan ayat matematik tambah hingga tiga ukuran panjang melibatkan meter dan sentimeter.',
+          '6.1.3 Menyelesaikan ayat matematik tolak ukuran panjang hingga dua nilai daripada satu nilai melibatkan meter dan sentimeter.',
+          '6.1.4 Menyelesaikan ayat matematik darab melibatkan ukuran panjang dengan nombor satu digit berkaitan meter dan sentimeter.',
+          '6.1.5 Menyelesaikan ayat matematik bahagi melibatkan ukuran panjang dengan nombor satu digit berkaitan meter dan sentimeter.'
+        ]},
+        { kod: '6.2 Jisim', sp: [
+          '6.2.1 Menukar unit ukuran jisim melibatkan kilogram dan gram.',
+          '6.2.2 Menyelesaikan ayat matematik tambah hingga tiga ukuran jisim melibatkan kilogram dan gram.',
+          '6.2.3 Menyelesaikan ayat matematik tolak ukuran jisim hingga dua nilai daripada satu nilai melibatkan kilogram dan gram.',
+          '6.2.4 Menyelesaikan ayat matematik darab melibatkan ukuran jisim dengan nombor satu digit berkaitan kilogram dan gram.',
+          '6.2.5 Menyelesaikan ayat matematik bahagi melibatkan ukuran jisim dengan nombor satu digit berkaitan kilogram dan gram.'
+        ]},
+        { kod: '6.3 Isi Padu Cecair', sp: [
+          '6.3.1 Menukar unit isi padu cecair melibatkan liter dan mililiter.',
+          '6.3.2 Menyelesaikan ayat matematik tambah hingga tiga isi padu cecair melibatkan liter dan mililiter.',
+          '6.3.3 Menyelesaikan ayat matematik tolak isi padu cecair hingga dua nilai daripada satu nilai melibatkan liter dan mililiter.',
+          '6.3.4 Menyelesaikan ayat matematik darab melibatkan isi padu cecair dengan nombor satu digit berkaitan liter dan mililiter.',
+          '6.3.5 Menyelesaikan ayat matematik bahagi melibatkan isi padu cecair dengan nombor satu digit berkaitan liter dan mililiter.'
+        ]},
+        { kod: '6.4 Penyelesaian Masalah', sp: [
+          '6.4.1 Mereka cerita berdasarkan ayat matematik melibatkan ukuran dan sukatan.',
+          '6.4.2 Menyelesaikan masalah berkaitan ukuran dan sukatan dalam situasi harian.'
+        ]}
+      ]},
+      { tajuk: '7. Ruang', sk: [
+        { kod: '7.1 Prisma', sp: [
+          '7.1.1 Mengenal prisma segi empat sama, prisma segi empat tepat dan prisma segi tiga.',
+          '7.1.2 Mencirikan dan melabelkan prisma segi empat sama, prisma segi empat tepat dan prisma segi tiga berdasarkan permukaan, tapak, bucu dan tepi.'
+        ]},
+        { kod: '7.2 Membanding Prisma', sp: [
+          '7.2.1 Membandingkan prisma dan bukan prisma berdasarkan permukaan, tapak, bucu dan tepi.'
+        ]},
+        { kod: '7.3 Poligon Sekata', sp: [
+          '7.3.1 Mengenal pasti bentuk poligon sekata bagi pentagon, heksagon, heptagon dan oktagon.',
+          '7.3.2 Menghasilkan corak berasaskan bentuk poligon sekata.'
+        ]},
+        { kod: '7.4 Paksi Simetri', sp: [
+          '7.4.1 Mengenal pasti dan melukis paksi simetri.'
+        ]},
+        { kod: '7.5 Penyelesaian Masalah', sp: [
+          '7.5.1 Menyelesaikan masalah melibatkan prisma dan paksi simetri bentuk dua dimensi.'
+        ]}
+      ]},
+      { tajuk: '8. Koordinat', sk: [
+        { kod: '8.1 Koordinat pada Sukatan Peta', sp: [
+          '8.1.1 Mengenal pasti kedudukan objek berdasarkan titik rujukan dengan menggunakan perbendaharaan kata yang sesuai (contoh: ke kanan, ke atas, ke timur, ke utara).',
+          '8.1.2 Menamakan objek berdasarkan kedudukan pada paksi mengufuk dan paksi mencancang.',
+          '8.1.3 Menentukan kedudukan objek pada paksi mengufuk dan paksi mencancang.'
+        ]},
+        { kod: '8.2 Penyelesaian Masalah', sp: [
+          '8.2.1 Menyelesaikan masalah melibatkan koordinat.'
+        ]}
+      ]},
+      { tajuk: '9. Pengurusan Data', sk: [
+        { kod: '9.1 Mengumpul dan Menyusun Data', sp: [
+          '9.1.1 Mengumpul, mengelas dan menyusun data berdasarkan situasi harian.'
+        ]},
+        { kod: '9.2 Mewakili Data', sp: [
+          '9.2.1 Membaca dan mendapatkan maklumat daripada carta pai.'
+        ]},
+        { kod: '9.3 Membaca dan Mentafsir Data', sp: [
+          '9.3.1 Membuat perkaitan antara piktograf, carta palang dan carta pai bagi mewakili suatu maklumat.'
+        ]},
+        { kod: '9.4 Penyelesaian Masalah', sp: [
+          '9.4.1 Menyelesaikan masalah melibatkan pengurusan data dalam situasi harian.'
+        ]}
+      ]}
+    ],
     'Tahun 2': []
   }
 };
@@ -2409,23 +2690,32 @@ function loadQuickClass() {
     tajukDrop.style.display = '';
     tajukText.style.display = 'none';
     tajukText.value = '';
-    // SK: dropdown (kosong dulu)
-    skDrop.innerHTML = '<option value="">-- Pilih Tajuk dahulu --</option>';
-    skDrop.value = '';
-    skDrop.style.display = '';
-    skText.style.display = 'none';
-    skText.value = '';
-    // SP: checkbox wrap (kosong dulu, keluar selepas SK dipilih)
     var spWrap = document.getElementById('qaSPCheckboxWrap');
-    spWrap.innerHTML = '';
-    spWrap.dataset.value = '';
-    spWrap.style.display = '';
-    spText.style.display = 'none';
-    spText.value = '';
+    var skCbWrap = document.getElementById('qaSKCheckboxWrap');
+    spWrap.innerHTML = ''; spWrap.dataset.value = ''; spWrap.style.display = '';
+    spText.style.display = 'none'; spText.value = '';
+
+    if (cls.subject === 'Matematik') {
+      // Matematik — SK multichoice checkbox
+      skCbWrap.innerHTML = ''; skCbWrap.dataset.value = '';
+      skCbWrap.style.display = 'none'; // kosong dulu, isi bila tajuk dipilih
+      skDrop.style.display = 'none'; skDrop.value = '';
+      skText.style.display = 'none'; skText.value = '';
+      // SP hidden dulu — keluar bila SK dipilih
+      spWrap.style.display = 'none';
+    } else {
+      // Sains — SK dropdown seperti biasa
+      skCbWrap.style.display = 'none'; skCbWrap.innerHTML = ''; skCbWrap.dataset.value = '';
+      skDrop.innerHTML = '<option value="">-- Pilih Tajuk dahulu --</option>';
+      skDrop.value = ''; skDrop.style.display = '';
+      skText.style.display = 'none'; skText.value = '';
+    }
   } else {
-    // Tajuk, SK & SP: text input biasa
+    // Kelas tanpa DSKP — semua text input biasa
     tajukDrop.style.display = 'none'; tajukDrop.value = '';
     tajukText.style.display = ''; tajukText.value = '';
+    var skCbWrap2 = document.getElementById('qaSKCheckboxWrap');
+    if (skCbWrap2) { skCbWrap2.style.display = 'none'; skCbWrap2.innerHTML = ''; skCbWrap2.dataset.value = ''; }
     skDrop.style.display = 'none';
     skText.style.display = ''; skText.value = '';
     var spWrap2 = document.getElementById('qaSPCheckboxWrap');
@@ -2447,19 +2737,87 @@ function onTajukDropdownChange() {
   const cid   = document.getElementById('qaClass').value;
   const cls   = DB.classes.find(c=>c.id===cid);
   const tajuk = document.getElementById('qaTopicSelect').value;
-  const skDrop = document.getElementById('qaSKSelect');
-  const spDrop = document.getElementById('qaSPSelect');
+  const skDrop   = document.getElementById('qaSKSelect');
+  const skCbWrap = document.getElementById('qaSKCheckboxWrap');
+  const spWrap   = document.getElementById('qaSPCheckboxWrap');
+
+  // Reset SP
+  if (spWrap) { spWrap.innerHTML = ''; spWrap.dataset.value = ''; }
+
   if (cls && tajuk && DSKP_FULL[cls.subject] && DSKP_FULL[cls.subject][cls.year]) {
     const entry = DSKP_FULL[cls.subject][cls.year].find(function(t){ return t.tajuk === tajuk; });
     if (entry) {
-      skDrop.innerHTML = '<option value="">-- Pilih Standard Kandungan --</option>' +
-        entry.sk.map(function(s){ return '<option value="'+s.kod+'">'+s.kod+'</option>'; }).join('');
-      skDrop.value = '';
+      if (cls.subject === 'Matematik') {
+        // SK sebagai checkbox
+        skCbWrap.innerHTML = '';
+        skCbWrap.dataset.value = '';
+        entry.sk.forEach(function(sk, i) {
+          var id = 'qaSKcb_' + i;
+          var div = document.createElement('div');
+          div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);';
+          if (i === entry.sk.length - 1) div.style.borderBottom = 'none';
+          div.innerHTML = '<input type="checkbox" id="'+id+'" value="'+sk.kod+'" onchange="onSKCheckboxChange()" style="margin-top:3px;flex-shrink:0;accent-color:#1e40af;width:15px;height:15px">'
+            + '<label for="'+id+'" style="font-size:13px;cursor:pointer;line-height:1.4">'+sk.kod+'</label>';
+          skCbWrap.appendChild(div);
+        });
+        skCbWrap.style.display = '';
+        skDrop.style.display = 'none';
+      } else {
+        // SK sebagai dropdown (Sains)
+        skDrop.innerHTML = '<option value="">-- Pilih Standard Kandungan --</option>' +
+          entry.sk.map(function(s){ return '<option value="'+s.kod+'">'+s.kod+'</option>'; }).join('');
+        skDrop.value = '';
+        skDrop.style.display = '';
+        skCbWrap.style.display = 'none';
+      }
     }
   }
-  // Reset SP checkbox wrap when tajuk changes
+  refreshStudentTPBadges();
+}
+
+// Bila SK checkbox berubah (Matematik) — kumpul SP dari semua SK yang ditanda
+function onSKCheckboxChange() {
+  const cid   = document.getElementById('qaClass').value;
+  const cls   = DB.classes.find(c=>c.id===cid);
+  const tajuk = document.getElementById('qaTopicSelect').value;
+
+  var checked = [];
+  document.querySelectorAll('#qaSKCheckboxWrap input[type=checkbox]:checked').forEach(function(cb){
+    checked.push(cb.value);
+  });
+  document.getElementById('qaSKCheckboxWrap').dataset.value = checked.join(' | ');
+
+  // Kumpul semua SP dari SK yang ditanda
   var spWrap = document.getElementById('qaSPCheckboxWrap');
-  if (spWrap) { spWrap.innerHTML = ''; spWrap.dataset.value = ''; }
+  spWrap.innerHTML = '';
+  spWrap.dataset.value = '';
+
+  if (checked.length && cls && DSKP_FULL[cls.subject] && DSKP_FULL[cls.subject][cls.year]) {
+    const tajukEntry = DSKP_FULL[cls.subject][cls.year].find(function(t){ return t.tajuk === tajuk; });
+    if (tajukEntry) {
+      var allSP = [];
+      checked.forEach(function(skKod) {
+        var skEntry = tajukEntry.sk.find(function(s){ return s.kod === skKod; });
+        if (skEntry) allSP = allSP.concat(skEntry.sp);
+      });
+      if (allSP.length) {
+        spWrap.style.display = '';
+        allSP.forEach(function(sp, i) {
+          var id = 'qaSPcb_' + i;
+          var div = document.createElement('div');
+          div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);';
+          if (i === allSP.length - 1) div.style.borderBottom = 'none';
+          div.innerHTML = '<input type="checkbox" id="'+id+'" value="'+sp+'" onchange="onSPCheckboxChange()" style="margin-top:3px;flex-shrink:0;accent-color:#1e40af;width:15px;height:15px">'
+            + '<label for="'+id+'" style="font-size:13px;cursor:pointer;line-height:1.4">'+sp+'</label>';
+          spWrap.appendChild(div);
+        });
+      } else {
+        spWrap.style.display = 'none';
+      }
+    }
+  } else {
+    spWrap.style.display = 'none';
+  }
   refreshStudentTPBadges();
 }
 
@@ -2574,17 +2932,23 @@ function formatQADate(el) {
 
 function getSelectedTopic() {
   if (_qaActiveTab === 'sk') {
-    // Tab S. Kandungan — utamakan SP checkbox kalau ada pilihan
-    var wrap = document.getElementById('qaSPCheckboxWrap');
-    if (wrap && wrap.style.display !== 'none') {
-      var spVal = wrap.dataset.value || '';
+    // Matematik — SK checkbox
+    var skCbWrap = document.getElementById('qaSKCheckboxWrap');
+    if (skCbWrap && skCbWrap.style.display !== 'none') {
+      var skCbVal = skCbWrap.dataset.value || '';
+      if (skCbVal) return skCbVal;
+    }
+    // Sains — SP checkbox
+    var spWrap = document.getElementById('qaSPCheckboxWrap');
+    if (spWrap && spWrap.style.display !== 'none') {
+      var spVal = spWrap.dataset.value || '';
       if (spVal) return spVal;
     }
     // SP text input
     var spText = document.getElementById('qaSPCombined');
     if (spText && spText.style.display !== 'none' && spText.value.trim())
       return spText.value.trim();
-    // Fallback ke SK
+    // Fallback ke SK dropdown
     var skDrop = document.getElementById('qaSKSelect');
     if (skDrop && skDrop.style.display !== 'none') return skDrop.value || '';
     return (document.getElementById('qaSKText').value || '').trim();
@@ -2659,8 +3023,13 @@ function saveQuickAssess() {
   // Get topic and SK/SP values
   let topic = '', skVal = '', spVals = [];
   if (_qaActiveTab === 'sk') {
-    var skDrop = document.getElementById('qaSKSelect');
-    skVal = (skDrop && skDrop.style.display !== 'none') ? skDrop.value : (document.getElementById('qaSKText').value || '').trim();
+    var skCbWrap = document.getElementById('qaSKCheckboxWrap');
+    if (skCbWrap && skCbWrap.style.display !== 'none' && skCbWrap.dataset.value) {
+      skVal = skCbWrap.dataset.value;
+    } else {
+      var skDrop = document.getElementById('qaSKSelect');
+      skVal = (skDrop && skDrop.style.display !== 'none') ? skDrop.value : (document.getElementById('qaSKText').value || '').trim();
+    }
     var wrap = document.getElementById('qaSPCheckboxWrap');
     if (wrap && wrap.style.display !== 'none' && wrap.dataset.value) {
       spVals = wrap.dataset.value.split(' | ').filter(Boolean);
